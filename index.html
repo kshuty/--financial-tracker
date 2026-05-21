@@ -64,11 +64,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .sel:focus,.inp-text:focus,.inp-num:focus{outline:none;border-color:var(--blue)}
 .inp-num{text-align:right;font-weight:600}
 
-/* ── Confirmation banner ── */
-.confirm-banner{display:none;align-items:center;gap:10px;background:var(--green-l);border:1.5px solid var(--green);border-radius:var(--rs);padding:11px 14px;margin-bottom:14px}
-.confirm-banner.show{display:flex}
-.cb-icon{font-size:20px}
-.cb-text{flex:1;font-size:13px;font-weight:500;color:var(--green-d)}
+
 
 /* ── ADD PAGE ── */
 .add-form{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);padding:16px;margin-bottom:14px}
@@ -206,9 +202,10 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .emoji-inp:focus{outline:none;border-color:var(--blue)}
 .emoji-set-btn{height:40px;padding:0 16px;border-radius:var(--rs);background:var(--blue);color:#fff;border:none;font-size:13px;font-weight:700;cursor:pointer}
 
-/* Toast */
-.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(60px);background:var(--text);color:var(--bg);padding:9px 18px;border-radius:20px;font-size:12px;font-weight:500;transition:transform .25s;z-index:999;white-space:nowrap;pointer-events:none}
-.toast.show{transform:translateX(-50%) translateY(0)}
+/* Popup toast */
+.toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(.85);opacity:0;background:var(--surface);color:var(--text);border:1.5px solid var(--border2);box-shadow:0 8px 32px rgba(0,0,0,.18);padding:18px 28px;border-radius:18px;font-size:15px;font-weight:600;text-align:center;z-index:999;pointer-events:none;transition:opacity .18s,transform .18s;min-width:180px;max-width:260px;line-height:1.4}
+.toast.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.toast-icon{display:block;font-size:26px;margin-bottom:6px}
 </style>
 </head>
 <body>
@@ -226,10 +223,6 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 
 <!-- ══ ADD PAGE ══ -->
 <div class="page on" id="pageAdd">
-  <div class="confirm-banner" id="confirmBanner" style="margin-top:10px">
-    <span class="cb-icon">✅</span>
-    <span class="cb-text" id="confirmText">Entry added!</span>
-  </div>
   <div class="add-form" style="margin-top:10px">
     <div class="form-row">
       <div class="form-lbl">Type</div>
@@ -308,20 +301,11 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
   <button class="tb on" id="tbAdd" onclick="switchTab('add')">
     <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
     Add Entry
+  </button>
   <button class="tb" id="tbSummary" onclick="switchTab('summary')">
-  <svg viewBox="0 0 24 24" fill="none">
-    <!-- list lines -->
-    <line x1="8" y1="6"  x2="21" y2="6" />
-    <line x1="8" y1="12" x2="21" y2="12" />
-    <line x1="8" y1="18" x2="21" y2="18" />
-
-    <!-- bullet circles -->
-    <circle cx="4" cy="6"  r="1.2" />
-    <circle cx="4" cy="12" r="1.2" />
-    <circle cx="4" cy="18" r="1.2" />
-  </svg>
-  Summary
-</button>
+    <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+    Summary
+  </button>
   <button class="tb" id="tbSetup" onclick="switchTab('setup')">
     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
     Setup
@@ -414,7 +398,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<div class="toast" id="toast"><span class="toast-icon" id="toastIcon"></span><span id="toastMsg"></span></div>
 
 <script>
 /* ══ Constants ══ */
@@ -449,7 +433,6 @@ let curYear=now.getFullYear(), curMonth=now.getMonth();
 let addType='expense';
 let editIdx=null, editTypeState='expense';
 let emojiTarget=null;
-let dragSrcIdx=null, dragSrcType=null;
 
 /* ══ Date picker state ══ */
 let dpTarget=null;       // 'add' | 'edit'
@@ -477,7 +460,15 @@ function saveEntries(e){save('entries_'+monthKey(),e);}
 
 /* ══ Helpers ══ */
 function fmt(n){const a=Math.abs(n);const s=a%1===0?a.toLocaleString('en-US'):a.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});return(n<0?'-':'')+'$'+s;}
-function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2200);}
+function showToast(msg,icon=''){
+  const t=document.getElementById('toast');
+  document.getElementById('toastIcon').textContent=icon;
+  document.getElementById('toastIcon').style.display=icon?'block':'none';
+  document.getElementById('toastMsg').textContent=msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer=setTimeout(()=>t.classList.remove('show'),1000);
+}
 function autoIcon(name){
   const n=name.toLowerCase();
   const map={salary:'💼',wage:'💼',freelance:'💻',consult:'💻',bonus:'🏆',invest:'📈',dividend:'📈',rental:'🏠',rent:'🏠',mortgage:'🏠',side:'⚡',hustle:'⚡',tax:'🧾',refund:'🧾',gift:'🎁',cash:'💰',income:'💰',grocery:'🛒',grocer:'🛒',dining:'🍔',takeout:'🍔',coffee:'☕',fuel:'⛽',gas:'⛽',car:'🚗',insurance:'🛡️',health:'🏥',doctor:'💊',dental:'💊',gym:'🏋️',cloth:'👕',entertain:'🎬',stream:'📺',care:'🪥',phone:'📱',internet:'📶',electric:'💡',loan:'💸',credit:'💳',travel:'✈️',hotel:'🏨',vacation:'🌴',saving:'🏦',misc:'📦',pet:'🐾',child:'👶',school:'🎓',charity:'🙏',donation:'🙏'};
@@ -642,10 +633,7 @@ function submitEntry(){
   const s=getSetup();
   const cats=addType==='income'?s.income:s.expense;
   const catObj=cats.find(c=>c.n===cat)||{i:'📌'};
-  document.getElementById('confirmText').textContent=`${catObj.i} ${cat} — ${fmt(amt)} on ${fmtDateShort(addDateY,addDateM,addDateD)}`;
-  const banner=document.getElementById('confirmBanner');
-  banner.classList.add('show');
-  setTimeout(()=>banner.classList.remove('show'),3500);
+  showToast(`${cat}\n${fmt(amt)} added`,catObj.i);
 }
 
 /* ══ Summary ══ */
@@ -764,7 +752,10 @@ function renderSetupList(type,cats){
   el.innerHTML=cats.map((c,i)=>`
     <div class="setup-item" draggable="true" data-type="${type}" data-i="${i}"
       ondragstart="dragStart(event)" ondragover="dragOver(event)" ondrop="dragDrop(event)" ondragend="dragEnd(event)">
-      <span class="drag-handle">☰</span>
+      <span class="drag-handle" data-type="${type}" data-i="${i}"
+        ontouchstart="touchDragStart(event,'${type}',${i})"
+        ontouchmove="touchDragMove(event)"
+        ontouchend="touchDragEnd(event)">☰</span>
       <button class="setup-emoji-btn" onclick="openEmojiPicker('${type}',${i})">${c.i}</button>
       <span class="setup-name">${c.n}</span>
       <button class="setup-del" onclick="removeCat('${type}',${i})">✕</button>
@@ -797,11 +788,60 @@ function removeCat(type,idx){
   const s=getSetup();s[type].splice(idx,1);saveSetup(s);renderSetup();populateAddSelect();
 }
 
-/* ══ Drag reorder ══ */
+/* ══ Drag reorder (touch + mouse) ══ */
+let dragSrcIdx=null,dragSrcType=null;
+let _touchDragEl=null,_touchClone=null,_touchType=null,_touchStartY=0,_touchCurIdx=null;
+
 function dragStart(e){dragSrcIdx=+e.currentTarget.dataset.i;dragSrcType=e.currentTarget.dataset.type;e.currentTarget.classList.add('dragging');e.dataTransfer.effectAllowed='move';}
 function dragOver(e){e.preventDefault();e.dataTransfer.dropEffect='move';document.querySelectorAll('.setup-item.drag-over').forEach(el=>el.classList.remove('drag-over'));e.currentTarget.classList.add('drag-over');}
 function dragDrop(e){e.preventDefault();const ti=+e.currentTarget.dataset.i,tt=e.currentTarget.dataset.type;if(dragSrcType!==tt||dragSrcIdx===ti)return;const s=getSetup();const arr=s[dragSrcType];const mv=arr.splice(dragSrcIdx,1)[0];arr.splice(ti,0,mv);saveSetup(s);renderSetup();populateAddSelect();}
 function dragEnd(e){e.currentTarget.classList.remove('dragging');document.querySelectorAll('.setup-item.drag-over').forEach(el=>el.classList.remove('drag-over'));}
+
+// Touch drag
+function touchDragStart(e,type,idx){
+  e.preventDefault();
+  _touchType=type; _touchCurIdx=idx;
+  _touchDragEl=e.currentTarget.closest('.setup-item');
+  _touchStartY=e.touches[0].clientY;
+  // clone
+  _touchClone=_touchDragEl.cloneNode(true);
+  const r=_touchDragEl.getBoundingClientRect();
+  Object.assign(_touchClone.style,{position:'fixed',left:r.left+'px',top:r.top+'px',width:r.width+'px',opacity:'0.85',zIndex:999,pointerEvents:'none',background:'var(--surface)',borderRadius:'8px',boxShadow:'0 4px 20px rgba(0,0,0,.2)'});
+  document.body.appendChild(_touchClone);
+  _touchDragEl.style.opacity='0.3';
+}
+function touchDragMove(e){
+  if(!_touchClone) return;
+  e.preventDefault();
+  const dy=e.touches[0].clientY-_touchStartY;
+  const r=_touchDragEl.getBoundingClientRect();
+  _touchClone.style.top=(r.top+dy)+'px';
+  // find item under touch
+  _touchClone.style.display='none';
+  const el=document.elementFromPoint(e.touches[0].clientX,e.touches[0].clientY);
+  _touchClone.style.display='';
+  const item=el&&el.closest('.setup-item[data-type="'+_touchType+'"]');
+  document.querySelectorAll('.setup-item.drag-over').forEach(el=>el.classList.remove('drag-over'));
+  if(item&&item!==_touchDragEl) item.classList.add('drag-over');
+}
+function touchDragEnd(e){
+  if(!_touchClone) return;
+  _touchClone.remove(); _touchClone=null;
+  _touchDragEl.style.opacity='';
+  const over=document.querySelector('.setup-item.drag-over[data-type="'+_touchType+'"]');
+  document.querySelectorAll('.setup-item.drag-over').forEach(el=>el.classList.remove('drag-over'));
+  if(over){
+    const ti=+over.dataset.i;
+    if(ti!==_touchCurIdx){
+      const s=getSetup();
+      const arr=s[_touchType];
+      const mv=arr.splice(_touchCurIdx,1)[0];
+      arr.splice(ti,0,mv);
+      saveSetup(s);renderSetup();populateAddSelect();
+    }
+  }
+  _touchDragEl=null; _touchType=null; _touchCurIdx=null;
+}
 
 /* ══ Emoji picker ══ */
 function openEmojiPicker(type,idx){

@@ -10,7 +10,7 @@
 :root{
   --green:#1a9e6e;--green-l:#e8f7f1;--green-d:#0e6a49;
   --red:#d94f3a;--red-l:#fdf0ee;--red-d:#9c2d1e;
-  --blue:#2563eb;--blue-l:#eff6ff;
+  --blue:#2563eb;--blue-l:#eff6ff;--blue-d:#1d4ed8;
   --bg:#f5f4f0;--surface:#fff;--surface2:#f0efe9;
   --border:rgba(0,0,0,.08);--border2:rgba(0,0,0,.15);
   --text:#1a1917;--text2:#5e5c57;--text3:#9c9a94;
@@ -20,7 +20,7 @@
 @media(prefers-color-scheme:dark){:root{
   --green:#27c484;--green-l:#0d2e21;--green-d:#6de8b4;
   --red:#f06b56;--red-l:#2e1410;--red-d:#f9a898;
-  --blue:#60a5fa;--blue-l:#1e2a3a;
+  --blue:#60a5fa;--blue-l:#1e2a3a;--blue-d:#93c5fd;
   --bg:#131210;--surface:#1e1d1b;--surface2:#272623;
   --border:rgba(255,255,255,.07);--border2:rgba(255,255,255,.14);
   --text:#f0ede8;--text2:#a09d97;--text3:#5e5c57;
@@ -55,7 +55,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .card{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;margin-bottom:14px}
 .sec-hdr{display:flex;align-items:center;gap:8px;margin:14px 0 8px}
 .sec-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
-.sec-icon.g{background:var(--green-l)}.sec-icon.r{background:var(--red-l)}
+.sec-icon.g{background:var(--green-l)}.sec-icon.r{background:var(--red-l)}.sec-icon.b{background:var(--blue-l)}
 .sec-lbl{font-size:14px;font-weight:600}
 .empty-msg{padding:20px;text-align:center;font-size:13px;color:var(--text3)}
 .form-lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);margin-bottom:5px}
@@ -73,6 +73,29 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .type-btn{flex:1;height:38px;border-radius:var(--rs);border:1.5px solid var(--border2);background:var(--surface2);color:var(--text2);font-size:13px;font-weight:600;cursor:pointer}
 .type-btn.on-g{background:var(--green-l);border-color:var(--green);color:var(--green-d)}
 .type-btn.on-r{background:var(--red-l);border-color:var(--red);color:var(--red-d)}
+.type-btn.on-b{background:var(--blue-l);border-color:var(--blue);color:var(--blue-d)}
+
+/* ── Recurring ── */
+.rec-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border)}
+.rec-item:last-child{border-bottom:none}
+.rec-day-badge{width:36px;height:36px;border-radius:8px;background:var(--surface2);border:1.5px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;color:var(--text2)}
+.rec-info{flex:1;min-width:0}
+.rec-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rec-sub{font-size:11px;color:var(--text3);margin-top:1px}
+.rec-amt{font-size:14px;font-weight:700;flex-shrink:0}
+.rec-del{background:none;border:none;cursor:pointer;color:var(--text3);font-size:16px;padding:2px 0 2px 6px;flex-shrink:0}
+.rec-del:active{color:var(--red)}
+.rec-add-form{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);padding:16px;margin-bottom:14px}
+.rec-add-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);margin-bottom:12px}
+.rec-row{margin-bottom:10px}
+.rec-day-row{display:flex;gap:8px;align-items:flex-end}
+.rec-day-inp{width:80px;height:42px;border:1.5px solid var(--border2);border-radius:var(--rs);background:var(--surface2);color:var(--text);font-size:16px;font-weight:700;text-align:center;padding:0 8px}
+.rec-day-inp:focus{outline:none;border-color:var(--blue)}
+.rec-note{font-size:11px;color:var(--text3);flex:1;line-height:1.4;padding-bottom:2px}
+.rec-add-btn{width:100%;height:44px;border-radius:var(--rs);border:none;background:var(--blue);color:#fff;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px}
+.rec-add-btn:active{opacity:.85}
+.rec-inject-btn{width:100%;height:40px;border-radius:var(--rs);border:1.5px solid var(--border2);background:var(--surface2);color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;margin-bottom:14px}
+.rec-inject-btn:active{background:var(--blue-l);border-color:var(--blue);color:var(--blue)}
 .submit-btn{width:100%;height:46px;border-radius:var(--rs);border:none;background:var(--blue);color:#fff;font-size:15px;font-weight:700;cursor:pointer;margin-top:4px}
 .submit-btn:active{opacity:.85}
 
@@ -124,20 +147,23 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .dp-confirm-btn:active{opacity:.85}
 
 /* ── SUMMARY PAGE ── */
-.stat-strip{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.stat-strip{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.stat-strip-2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
 .stat{background:var(--surface);border-radius:var(--rs);padding:10px 8px;text-align:center;box-shadow:var(--shadow)}
 .stat-l{font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--text3);margin-bottom:3px}
 .stat-v{font-size:18px;font-weight:700;letter-spacing:-.4px}
 .bar-wrap{background:var(--surface);border-radius:var(--rs);padding:10px 12px 8px;margin-bottom:12px;box-shadow:var(--shadow)}
 .bar-track{height:7px;border-radius:4px;background:var(--surface2);display:flex;overflow:hidden}
 .bar-g{height:7px;background:var(--green);border-radius:4px 0 0 4px;transition:width .35s}
-.bar-r{height:7px;background:var(--red);transition:width .35s}
+.bar-b{height:7px;background:var(--blue);transition:width .35s}
+.bar-r{height:7px;background:var(--red);border-radius:0 4px 4px 0;transition:width .35s}
 .bar-note{font-size:11px;font-weight:500;text-align:right;margin-top:5px}
 .date-group-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);padding:10px 14px 4px}
 .entry-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border)}
 .entry-item:last-child{border-bottom:none}
 .entry-item.inc{background:var(--green-l)}
 .entry-item.exp{background:var(--red-l)}
+.entry-item.sav{background:var(--blue-l)}
 .ei-icon{font-size:17px;width:22px;text-align:center;flex-shrink:0}
 .ei-info{flex:1;min-width:0}
 .ei-cat{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -147,6 +173,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .ei-type-badge{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:2px 5px;border-radius:4px}
 .ei-type-badge.inc{background:rgba(26,158,110,.18);color:var(--green-d)}
 .ei-type-badge.exp{background:rgba(217,74,58,.18);color:var(--red-d)}
+.ei-type-badge.sav{background:rgba(37,99,235,.18);color:var(--blue-d)}
 .ei-edit{background:none;border:none;cursor:pointer;color:var(--text3);font-size:16px;padding:2px 0 2px 6px;line-height:1;flex-shrink:0}
 .ei-edit:active{color:var(--blue)}
 
@@ -229,6 +256,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       <div class="type-toggle">
         <button class="type-btn" id="typeIncome" onclick="setType('income')">📥 Income</button>
         <button class="type-btn on-r" id="typeExpense" onclick="setType('expense')">📤 Expense</button>
+        <button class="type-btn" id="typeSavings" onclick="setType('savings')">🏦 Savings</button>
       </div>
     </div>
     <div class="form-row">
@@ -237,7 +265,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
     </div>
     <div class="form-row">
       <div class="form-lbl">Description <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:var(--text3)">(e.g. where it's from)</span></div>
-      <input class="inp-text" type="text" id="addDesc" placeholder="e.g. Costco, Paycheck…"/>
+      <input class="inp-text" type="text" id="addDesc" placeholder="e.g. Walmart, Acme paycheck…"/>
     </div>
     <div class="form-row">
       <div class="form-lbl">Amount ($)</div>
@@ -260,10 +288,13 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
   <div class="stat-strip" style="margin-top:10px">
     <div class="stat"><div class="stat-l">Income</div><div class="stat-v" id="sInc" style="color:var(--green)">$0</div></div>
     <div class="stat"><div class="stat-l">Expenses</div><div class="stat-v" id="sExp" style="color:var(--red)">$0</div></div>
+  </div>
+  <div class="stat-strip-2">
+    <div class="stat"><div class="stat-l">Savings</div><div class="stat-v" id="sSav" style="color:var(--blue)">$0</div></div>
     <div class="stat"><div class="stat-l">Net</div><div class="stat-v" id="sNet">$0</div></div>
   </div>
   <div class="bar-wrap">
-    <div class="bar-track"><div class="bar-g" id="barG" style="width:50%"></div><div class="bar-r" id="barR" style="width:50%"></div></div>
+    <div class="bar-track"><div class="bar-g" id="barG" style="width:33%"></div><div class="bar-b" id="barB" style="width:34%"></div><div class="bar-r" id="barR" style="width:33%"></div></div>
     <div class="bar-note" id="barNote"></div>
   </div>
   <div class="card" id="unifiedList"></div>
@@ -290,6 +321,63 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
     <div class="custom-add-row">
       <input class="custom-inp" id="customExpInp" placeholder="Write your own…"/>
       <button class="add-cat-btn" onclick="addCustomCat('expense')">Add</button>
+    </div>
+  </div>
+  <div class="sec-hdr"><div class="sec-icon b">🏦</div><span class="sec-lbl">Savings categories</span></div>
+  <div class="setup-cat-list" id="setupSavList"></div>
+  <div class="setup-add-area">
+    <div class="setup-add-title">Add savings category</div>
+    <div class="suggestions" id="sugSavings"></div>
+    <div class="custom-add-row">
+      <input class="custom-inp" id="customSavInp" placeholder="Write your own…"/>
+      <button class="add-cat-btn" onclick="addCustomCat('savings')">Add</button>
+    </div>
+  </div>
+
+  <!-- Recurring Transactions -->
+  <div class="sec-hdr" style="margin-top:6px"><div class="sec-icon" style="background:var(--surface2);font-size:16px">🔁</div><span class="sec-lbl">Recurring transactions</span></div>
+  <p class="setup-intro" style="margin-bottom:10px">These auto-add to each month when you open the Summary. Each runs once per month.</p>
+  <button class="rec-inject-btn" onclick="injectRecurring(true)">↻ Re-apply recurring to this month</button>
+  <div class="card" id="recList"><div class="empty-msg">No recurring transactions yet</div></div>
+  <div class="rec-add-form">
+    <div class="rec-add-title">Add recurring transaction</div>
+    <div class="rec-row">
+      <div class="form-lbl">Type</div>
+      <div class="type-toggle">
+        <button class="type-btn" id="recTypeIncome" onclick="setRecType('income')">📥 Income</button>
+        <button class="type-btn on-r" id="recTypeExpense" onclick="setRecType('expense')">📤 Expense</button>
+        <button class="type-btn" id="recTypeSavings" onclick="setRecType('savings')">🏦 Savings</button>
+      </div>
+    </div>
+    <div class="rec-row">
+      <div class="form-lbl">Category</div>
+      <select class="sel" id="recCat"></select>
+    </div>
+    <div class="rec-row">
+      <div class="form-lbl">Description <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:var(--text3)">(optional)</span></div>
+      <input class="inp-text" type="text" id="recDesc" placeholder="e.g. Netflix, Rent, 401k…"/>
+    </div>
+    <div class="rec-row">
+      <div class="form-lbl">Amount ($)</div>
+      <input class="inp-num" type="number" id="recAmt" inputmode="decimal" min="0" step="0.01" placeholder="0.00"/>
+    </div>
+    <div class="rec-row">
+      <div class="form-lbl">Day of month</div>
+      <div class="rec-day-row">
+        <input class="rec-day-inp" type="number" id="recDay" inputmode="numeric" min="1" max="31" placeholder="1"/>
+        <span class="rec-note">Day 1–31. For months with fewer days it will use the last day of that month.</span>
+      </div>
+    </div>
+    <button class="rec-add-btn" onclick="addRecurring()">Add recurring transaction</button>
+  </div>
+
+  <!-- Import / Export -->
+  <div class="sec-hdr" style="margin-top:6px"><div class="sec-icon" style="background:var(--surface2);font-size:16px">💾</div><span class="sec-lbl">Backup & restore</span></div>
+  <div class="card" style="padding:16px;margin-bottom:14px">
+    <p style="font-size:13px;color:var(--text2);line-height:1.5;margin-bottom:14px">Export all your data to a JSON file for safekeeping or moving to a new device. Import to restore from a previous backup.</p>
+    <div style="display:flex;gap:8px">
+      <button onclick="exportData()" style="flex:1;height:44px;border-radius:var(--rs);border:none;background:var(--blue);color:#fff;font-size:14px;font-weight:700;cursor:pointer">📤 Export backup</button>
+      <button onclick="importData()" style="flex:1;height:44px;border-radius:var(--rs);border:1.5px solid var(--border2);background:var(--surface2);color:var(--text);font-size:14px;font-weight:600;cursor:pointer">📥 Import backup</button>
     </div>
   </div>
 </div>
@@ -324,6 +412,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       <div class="type-toggle">
         <button class="type-btn" id="editTypeIncome" onclick="setEditType('income')">📥 Income</button>
         <button class="type-btn" id="editTypeExpense" onclick="setEditType('expense')">📤 Expense</button>
+        <button class="type-btn" id="editTypeSavings" onclick="setEditType('savings')">🏦 Savings</button>
       </div>
     </div>
     <div class="modal-row">
@@ -424,7 +513,14 @@ const DEFAULT_EXP=[
   {n:'Personal care',i:'🪥'},{n:'Miscellaneous',i:'📦'},
 ];
 const SUG_INC=['Capital gains','Pension / retirement','Social security','Unemployment','Alimony received','Child support received','Business income','Gig / contract work','Reimbursement','Government benefits','Royalties','Lottery / gambling'];
-const SUG_EXP=['Coffee & drinks','Alcohol','Water & trash','HOA fees','Home repairs','Property tax','Renters insurance','Public transit','Rideshare / taxi','Parking / tolls','Car maintenance','Prescriptions','Therapy / mental health','Haircut / salon','Makeup / beauty','Video games','Books / magazines','Hobbies','Sports / recreation','Pet food','Vet / pet care','Childcare / daycare','School / tuition','Kids activities','Gifts given','Charity / donations','Flights','Hotels / lodging','Vacation spending','Savings transfer','Emergency fund','Credit card payment','Student loan','Personal loan','Tax payment','Subscriptions'];
+const SUG_EXP=['Coffee & drinks','Alcohol','Water & trash','HOA fees','Home repairs','Property tax','Renters insurance','Public transit','Rideshare / taxi','Parking / tolls','Car maintenance','Prescriptions','Therapy / mental health','Haircut / salon','Makeup / beauty','Video games','Books / magazines','Hobbies','Sports / recreation','Pet food','Vet / pet care','Childcare / daycare','School / tuition','Kids activities','Gifts given','Charity / donations','Flights','Hotels / lodging','Vacation spending','Credit card payment','Student loan','Personal loan','Tax payment','Subscriptions'];
+const DEFAULT_SAV=[
+  {n:'Emergency fund',i:'🆘'},{n:'Retirement / 401k',i:'🏦'},
+  {n:'Vacation fund',i:'🌴'},{n:'Down payment',i:'🏠'},
+  {n:'Investment account',i:'📈'},{n:'General savings',i:'💰'},
+];
+const SUG_SAV=['College fund','Car fund','Wedding fund','Medical fund','Home repairs fund','Tech fund','Business savings','Kids savings','HSA contribution','IRA contribution','Rainy day fund'];
+
 const EMOJI_POOL=['💼','💻','🏆','⏰','📈','💹','🏠','🏘️','⚡','🔧','🏢','👶','⚖️','🤝','🧓','🛡️','📋','🧾','🎁','💰','🛒','🍔','☕','🍺','⛽','🚗','🚙','🅿️','🚌','🚕','🏥','💊','💉','🏋️','🧠','👕','👟','🪥','✂️','💄','🎬','🎵','🖥️','🎮','📚','🎨','⚽','🎟️','🐾','🐶','🎓','🎒','🧸','🎀','🙏','✈️','🏨','🌴','🏦','🆘','📊','💳','📖','💸','🧬','📦','📱','📺','📑','💡','🚿','📶','🧾','🎰','↩️','🌟','💫','🔑','🏅','🎯','🍎','🧃','🛍️'];
 
 /* ══ App state ══ */
@@ -452,11 +548,15 @@ let editDateY, editDateM, editDateD;
 const SK=k=>'mt_'+k;
 function load(k){try{const v=localStorage.getItem(SK(k));return v?JSON.parse(v):null;}catch(e){return null;}}
 function save(k,v){try{localStorage.setItem(SK(k),JSON.stringify(v));}catch(e){}}
-function getSetup(){return load('setup')||{income:JSON.parse(JSON.stringify(DEFAULT_INC)),expense:JSON.parse(JSON.stringify(DEFAULT_EXP))};}
+function getSetup(){return load('setup')||{income:JSON.parse(JSON.stringify(DEFAULT_INC)),expense:JSON.parse(JSON.stringify(DEFAULT_EXP)),savings:JSON.parse(JSON.stringify(DEFAULT_SAV))};}
 function saveSetup(s){save('setup',s);}
+function getRecurring(){return load('recurring')||[];}
+function saveRecurring(r){save('recurring',r);}
 function monthKey(){return curYear+'_'+curMonth;}
 function getEntries(){return load('entries_'+monthKey())||[];}
 function saveEntries(e){save('entries_'+monthKey(),e);}
+function getInjected(){return load('injected_'+monthKey())||false;}
+function setInjected(){save('injected_'+monthKey(),true);}
 
 /* ══ Helpers ══ */
 function fmt(n){const a=Math.abs(n);const s=a%1===0?a.toLocaleString('en-US'):a.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});return(n<0?'-':'')+'$'+s;}
@@ -611,11 +711,12 @@ function setType(type){
   addType=type;
   document.getElementById('typeIncome').className='type-btn'+(type==='income'?' on-g':'');
   document.getElementById('typeExpense').className='type-btn'+(type==='expense'?' on-r':'');
+  document.getElementById('typeSavings').className='type-btn'+(type==='savings'?' on-b':'');
   populateAddSelect();
 }
 function populateAddSelect(){
   const s=getSetup();
-  const cats=addType==='income'?s.income:s.expense;
+  const cats=addType==='income'?s.income:addType==='savings'?s.savings:s.expense;
   document.getElementById('addCat').innerHTML=cats.map(c=>`<option value="${c.n}">${c.i} ${c.n}</option>`).join('');
 }
 function submitEntry(){
@@ -638,19 +739,25 @@ function submitEntry(){
 
 /* ══ Summary ══ */
 function renderSummary(){
+  injectRecurring(false);
   const entries=getEntries();
   const inc=entries.filter(e=>e.type==='income').reduce((a,e)=>a+e.amt,0);
   const exp=entries.filter(e=>e.type==='expense').reduce((a,e)=>a+e.amt,0);
-  const net=inc-exp;
+  const sav=entries.filter(e=>e.type==='savings').reduce((a,e)=>a+e.amt,0);
+  const net=inc-exp-sav;
   document.getElementById('sInc').textContent=fmt(inc);
   document.getElementById('sExp').textContent=fmt(exp);
+  document.getElementById('sSav').textContent=fmt(sav);
   const netEl=document.getElementById('sNet');
   netEl.textContent=fmt(net);
   netEl.style.color=net>=0?'var(--green)':'var(--red)';
-  const total=inc+exp;
-  const gw=total===0?50:Math.round(inc/total*100);
+  const total=inc+exp+sav;
+  const gw=total===0?33:Math.round(inc/total*100);
+  const bw=total===0?34:Math.round(sav/total*100);
+  const rw=total===0?33:100-gw-bw;
   document.getElementById('barG').style.width=gw+'%';
-  document.getElementById('barR').style.width=(100-gw)+'%';
+  document.getElementById('barB').style.width=bw+'%';
+  document.getElementById('barR').style.width=rw+'%';
   const noteEl=document.getElementById('barNote');
   if(total===0){noteEl.textContent='';}
   else if(net>=0){noteEl.style.color='var(--green)';noteEl.textContent='▲ '+fmt(net)+' surplus';}
@@ -671,12 +778,14 @@ function renderUnifiedList(entries){
   Object.keys(groups).sort((a,b)=>b.localeCompare(a)).forEach(date=>{
     html+=`<div class="date-group-lbl">${fmtDate(date)}</div>`;
     groups[date].forEach(e=>{
-      const cats=e.type==='income'?s.income:s.expense;
+      const cats=e.type==='income'?s.income:e.type==='savings'?(s.savings||[]):s.expense;
       const catObj=cats.find(c=>c.n===e.cat)||{i:'📌'};
-      const col=e.type==='income'?'var(--green)':'var(--red)';
-      const src=e.desc?`<div class="ei-src">${e.desc}</div>`:'';
-      const badge=e.type==='income'?'<span class="ei-type-badge inc">income</span>':'<span class="ei-type-badge exp">expense</span>';
-      html+=`<div class="entry-item ${e.type==='income'?'inc':'exp'}">
+      const col=e.type==='income'?'var(--green)':e.type==='savings'?'var(--blue)':'var(--red)';
+      const src=e.desc?`<div class="ei-src">${e.desc}${e._rec?' 🔁':''}</div>`:(e._rec?'<div class="ei-src">🔁 recurring</div>':'');
+      const badgeCls=e.type==='income'?'inc':e.type==='savings'?'sav':'exp';
+      const badgeLbl=e.type==='income'?'income':e.type==='savings'?'savings':'expense';
+      const badge=`<span class="ei-type-badge ${badgeCls}">${badgeLbl}</span>`;
+      html+=`<div class="entry-item ${e.type==='income'?'inc':e.type==='savings'?'sav':'exp'}">
         <span class="ei-icon">${catObj.i}</span>
         <div class="ei-info"><div class="ei-cat">${e.cat}</div>${src}</div>
         <div class="ei-right"><span class="ei-amt" style="color:${col}">${fmt(e.amt)}</span>${badge}</div>
@@ -692,18 +801,19 @@ function setEditType(type){
   editTypeState=type;
   document.getElementById('editTypeIncome').className='type-btn'+(type==='income'?' on-g':'');
   document.getElementById('editTypeExpense').className='type-btn'+(type==='expense'?' on-r':'');
+  document.getElementById('editTypeSavings').className='type-btn'+(type==='savings'?' on-b':'');
   const s=getSetup();
-  const cats=type==='income'?s.income:s.expense;
+  const cats=type==='income'?s.income:type==='savings'?(s.savings||[]):s.expense;
   const cur=document.getElementById('editCat').value;
   document.getElementById('editCat').innerHTML=cats.map(c=>`<option value="${c.n}" ${c.n===cur?'selected':''}>${c.i} ${c.n}</option>`).join('');
 }
 function openEdit(idx){
   editIdx=idx;
   const e=getEntries()[idx];
-  editTypeState=e.type;
-  setEditType(e.type);
+  editTypeState=e.type||'expense';
+  setEditType(editTypeState);
   const s=getSetup();
-  const cats=e.type==='income'?s.income:s.expense;
+  const cats=editTypeState==='income'?s.income:editTypeState==='savings'?(s.savings||[]):s.expense;
   document.getElementById('editCat').innerHTML=cats.map(c=>`<option value="${c.n}" ${c.n===e.cat?'selected':''}>${c.i} ${c.n}</option>`).join('');
   document.getElementById('editDesc').value=e.desc||'';
   document.getElementById('editAmt').value=e.amt;
@@ -741,13 +851,19 @@ function deleteEntry(){
 /* ══ Setup ══ */
 function renderSetup(){
   const s=getSetup();
+  if(!s.savings) s.savings=JSON.parse(JSON.stringify(DEFAULT_SAV));
   renderSetupList('income',s.income);
   renderSetupList('expense',s.expense);
+  renderSetupList('savings',s.savings);
   renderSuggestions('income',s.income);
   renderSuggestions('expense',s.expense);
+  renderSuggestions('savings',s.savings);
+  renderRecurringList();
 }
 function renderSetupList(type,cats){
-  const el=document.getElementById(type==='income'?'setupIncList':'setupExpList');
+  const idMap={income:'setupIncList',expense:'setupExpList',savings:'setupSavList'};
+  const el=document.getElementById(idMap[type]);
+  if(!el) return;
   if(!cats.length){el.innerHTML='<div class="empty-msg">No categories — add below</div>';return;}
   el.innerHTML=cats.map((c,i)=>`
     <div class="setup-item" draggable="true" data-type="${type}" data-i="${i}"
@@ -762,30 +878,169 @@ function renderSetupList(type,cats){
     </div>`).join('');
 }
 function renderSuggestions(type,active){
-  const pool=type==='income'?SUG_INC:SUG_EXP;
+  const pool=type==='income'?SUG_INC:type==='savings'?SUG_SAV:SUG_EXP;
+  const idMap={income:'sugIncome',expense:'sugExpense',savings:'sugSavings'};
   const existing=active.map(c=>c.n);
   const available=pool.filter(n=>!existing.includes(n));
-  const el=document.getElementById(type==='income'?'sugIncome':'sugExpense');
+  const el=document.getElementById(idMap[type]);
+  if(!el) return;
   if(!available.length){el.innerHTML='<span style="font-size:12px;color:var(--text3)">All suggestions added!</span>';return;}
   el.innerHTML=available.map(n=>`<button class="sug-chip" onclick="addSugCat('${type}','${n.replace(/'/g,"\\'")}')">+ ${n}</button>`).join('');
 }
 function addSugCat(type,name){
   const s=getSetup();
+  if(!s.savings) s.savings=JSON.parse(JSON.stringify(DEFAULT_SAV));
   if(s[type].find(c=>c.n===name)) return;
   s[type].push({n:name,i:autoIcon(name)});
   saveSetup(s);renderSetup();populateAddSelect();showToast(name+' added');
 }
 function addCustomCat(type){
-  const inp=document.getElementById(type==='income'?'customIncInp':'customExpInp');
+  const idMap={income:'customIncInp',expense:'customExpInp',savings:'customSavInp'};
+  const inp=document.getElementById(idMap[type]);
   const name=inp.value.trim();
   if(!name){showToast('Enter a name');return;}
   const s=getSetup();
+  if(!s.savings) s.savings=JSON.parse(JSON.stringify(DEFAULT_SAV));
   if(s[type].find(c=>c.n.toLowerCase()===name.toLowerCase())){showToast('Already exists');return;}
   s[type].push({n:name,i:autoIcon(name)});
   saveSetup(s);inp.value='';renderSetup();populateAddSelect();showToast(name+' added ✓');
 }
 function removeCat(type,idx){
-  const s=getSetup();s[type].splice(idx,1);saveSetup(s);renderSetup();populateAddSelect();
+  const s=getSetup();
+  if(!s.savings) s.savings=JSON.parse(JSON.stringify(DEFAULT_SAV));
+  s[type].splice(idx,1);saveSetup(s);renderSetup();populateAddSelect();
+}
+
+/* ══ Recurring transactions ══ */
+let recType='expense';
+function setRecType(type){
+  recType=type;
+  document.getElementById('recTypeIncome').className='type-btn'+(type==='income'?' on-g':'');
+  document.getElementById('recTypeExpense').className='type-btn'+(type==='expense'?' on-r':'');
+  document.getElementById('recTypeSavings').className='type-btn'+(type==='savings'?' on-b':'');
+  const s=getSetup();
+  if(!s.savings) s.savings=JSON.parse(JSON.stringify(DEFAULT_SAV));
+  const cats=type==='income'?s.income:type==='savings'?s.savings:s.expense;
+  document.getElementById('recCat').innerHTML=cats.map(c=>`<option value="${c.n}">${c.i} ${c.n}</option>`).join('');
+}
+function populateRecSelect(){
+  setRecType(recType);
+}
+function addRecurring(){
+  const cat=document.getElementById('recCat').value;
+  const desc=document.getElementById('recDesc').value.trim();
+  const amt=parseFloat(document.getElementById('recAmt').value);
+  const day=parseInt(document.getElementById('recDay').value);
+  if(!cat){showToast('Pick a category');return;}
+  if(!amt||amt<=0){showToast('Enter an amount');return;}
+  if(!day||day<1||day>31){showToast('Day must be 1–31');return;}
+  const recs=getRecurring();
+  recs.push({type:recType,cat,desc,amt,day,id:Date.now()});
+  saveRecurring(recs);
+  document.getElementById('recDesc').value='';
+  document.getElementById('recAmt').value='';
+  document.getElementById('recDay').value='';
+  renderRecurringList();
+  showToast('Recurring added ✓','🔁');
+}
+function removeRecurring(id){
+  const recs=getRecurring().filter(r=>r.id!==id);
+  saveRecurring(recs);
+  renderRecurringList();
+  showToast('Removed');
+}
+function renderRecurringList(){
+  const el=document.getElementById('recList');
+  if(!el) return;
+  const recs=getRecurring();
+  if(!recs.length){el.innerHTML='<div class="empty-msg">No recurring transactions yet</div>';return;}
+  const s=getSetup();
+  if(!s.savings) s.savings=[];
+  el.innerHTML=recs.map(r=>{
+    const cats=r.type==='income'?s.income:r.type==='savings'?s.savings:s.expense;
+    const catObj=cats.find(c=>c.n===r.cat)||{i:'📌'};
+    const col=r.type==='income'?'var(--green)':r.type==='savings'?'var(--blue)':'var(--red)';
+    const sub=r.desc||'';
+    return `<div class="rec-item">
+      <div class="rec-day-badge">
+        <div style="font-size:9px;color:var(--text3);line-height:1">day</div>
+        <div style="font-size:14px;font-weight:800;line-height:1.2">${r.day}</div>
+      </div>
+      <div class="rec-info">
+        <div class="rec-name">${catObj.i} ${r.cat}</div>
+        ${sub?`<div class="rec-sub">${sub}</div>`:''}
+      </div>
+      <span class="rec-amt" style="color:${col}">${fmt(r.amt)}</span>
+      <button class="rec-del" onclick="removeRecurring(${r.id})" title="Delete">🗑️</button>
+    </div>`;
+  }).join('');
+}
+function injectRecurring(force){
+  if(!force && getInjected()) return;
+  const recs=getRecurring();
+  if(!recs.length){if(force)showToast('No recurring set up','🔁');return;}
+  const entries=getEntries();
+  const maxDay=dim(curMonth,curYear);
+  let added=0;
+  recs.forEach(r=>{
+    const day=Math.min(r.day,maxDay);
+    const ds=dateStr(curYear,curMonth,day);
+    // remove old auto-injected version of this recurring for this month
+    const existIdx=entries.findIndex(e=>e._recId===r.id);
+    if(existIdx>=0) entries.splice(existIdx,1);
+    entries.push({type:r.type,cat:r.cat,desc:r.desc,amt:r.amt,date:ds,ts:Date.now(),_rec:true,_recId:r.id});
+    added++;
+  });
+  saveEntries(entries);
+  setInjected();
+  if(force){renderSummary();showToast(`${added} recurring applied ✓`,'🔁');}
+}
+
+/* ══ Import / Export ══ */
+function exportData(){
+  const allKeys=Object.keys(localStorage).filter(k=>k.startsWith('mt_'));
+  const data={_v:1,_exported:new Date().toISOString()};
+  allKeys.forEach(k=>{
+    try{data[k.replace('mt_','')]=JSON.parse(localStorage.getItem(k));}catch(e){}
+  });
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  const d=new Date();
+  a.href=url;
+  a.download=`financial-tracker-backup-${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Backup downloaded ✓','💾');
+}
+function importData(){
+  const inp=document.createElement('input');
+  inp.type='file';inp.accept='.json,application/json';
+  inp.onchange=e=>{
+    const file=e.target.files[0];
+    if(!file) return;
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      try{
+        const data=JSON.parse(ev.target.result);
+        if(!data||typeof data!=='object'){showToast('Invalid file','⚠️');return;}
+        // Clear existing mt_ keys
+        Object.keys(localStorage).filter(k=>k.startsWith('mt_')).forEach(k=>localStorage.removeItem(k));
+        let count=0;
+        Object.entries(data).forEach(([k,v])=>{
+          if(k.startsWith('_')) return; // skip metadata
+          try{localStorage.setItem('mt_'+k,JSON.stringify(v));count++;}catch(e){}
+        });
+        // Re-render everything
+        renderSummary();
+        renderSetup();
+        populateAddSelect();
+        showToast('Data restored ✓','✅');
+      }catch(err){showToast('Could not read file','⚠️');}
+    };
+    reader.readAsText(file);
+  };
+  inp.click();
 }
 
 /* ══ Drag reorder (touch + mouse) ══ */
@@ -876,6 +1131,7 @@ function changeMonth(dir){
 /* ══ Enter keys ══ */
 document.getElementById('customIncInp').addEventListener('keydown',e=>{if(e.key==='Enter')addCustomCat('income');});
 document.getElementById('customExpInp').addEventListener('keydown',e=>{if(e.key==='Enter')addCustomCat('expense');});
+document.getElementById('customSavInp').addEventListener('keydown',e=>{if(e.key==='Enter')addCustomCat('savings');});
 
 /* ══ Init ══ */
 const todayD=new Date();
@@ -884,6 +1140,7 @@ editDateY=addDateY; editDateM=addDateM; editDateD=addDateD;
 document.getElementById('addDateLabel').textContent='Today';
 document.getElementById('mname').textContent=MONTHS[curMonth]+' '+curYear;
 setType('expense');
+setRecType('expense');
 </script>
 </body>
 </html>

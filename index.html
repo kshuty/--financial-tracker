@@ -336,7 +336,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 
   <!-- Recurring Transactions -->
   <div class="sec-hdr" style="margin-top:6px"><div class="sec-icon" style="background:var(--surface2);font-size:16px">🔁</div><span class="sec-lbl">Recurring transactions</span></div>
-  <p class="setup-intro" style="margin-bottom:10px">These auto-add to each month when you open the Summary. Each runs once per month.</p>
+  <p class="setup-intro" style="margin-bottom:10px">These auto-add to each month when you open the Summary. Weekly/biweekly rules create multiple entries per month.</p>
   <button class="rec-inject-btn" onclick="injectRecurring(true)">↻ Re-apply recurring to this month</button>
   <div class="card" id="recList"><div class="empty-msg">No recurring transactions yet</div></div>
   <div class="rec-add-form">
@@ -362,11 +362,41 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
       <input class="inp-num" type="number" id="recAmt" inputmode="decimal" min="0" step="0.01" placeholder="0.00"/>
     </div>
     <div class="rec-row">
+      <div class="form-lbl">Frequency</div>
+      <div class="type-toggle" style="flex-wrap:wrap;gap:5px">
+        <button class="type-btn on-b" id="freqMonthly" onclick="setRecFreq('monthly')" style="font-size:12px">📅 Monthly</button>
+        <button class="type-btn" id="freqBiweekly" onclick="setRecFreq('biweekly')" style="font-size:12px">📆 Every 2 weeks</button>
+        <button class="type-btn" id="freqWeekly" onclick="setRecFreq('weekly')" style="font-size:12px">🗓 Weekly</button>
+      </div>
+    </div>
+    <!-- Monthly: day of month -->
+    <div class="rec-row" id="recMonthlyRow">
       <div class="form-lbl">Day of month</div>
       <div class="rec-day-row">
         <input class="rec-day-inp" type="number" id="recDay" inputmode="numeric" min="1" max="31" placeholder="1"/>
-        <span class="rec-note">Day 1–31. For months with fewer days it will use the last day of that month.</span>
+        <span class="rec-note">Day 1–31. Shorter months use the last available day.</span>
       </div>
+    </div>
+    <!-- Weekly / Biweekly: day of week + start date -->
+    <div class="rec-row" id="recWeeklyRow" style="display:none">
+      <div class="form-lbl">Day of week</div>
+      <select class="sel" id="recDow">
+        <option value="0">Sunday</option>
+        <option value="1">Monday</option>
+        <option value="2">Tuesday</option>
+        <option value="3">Wednesday</option>
+        <option value="4">Thursday</option>
+        <option value="5">Friday</option>
+        <option value="6">Saturday</option>
+      </select>
+    </div>
+    <div class="rec-row" id="recStartRow" style="display:none">
+      <div class="form-lbl">Starting from</div>
+      <button class="date-trigger" id="recStartTrigger" onclick="openDatePicker('rec')">
+        <span class="date-trigger-icon">📅</span>
+        <span class="date-trigger-text" id="recStartLabel">Today</span>
+        <span class="date-trigger-arrow">▾</span>
+      </button>
     </div>
     <button class="rec-add-btn" onclick="addRecurring()">Add recurring transaction</button>
   </div>
@@ -591,8 +621,8 @@ function fmtDateShort(y,m,d){
 /* ══ Date Picker ══ */
 function openDatePicker(target){
   dpTarget=target;
-  // Load committed date into working state
   if(target==='add'){dpY=addDateY;dpM=addDateM;dpD=addDateD;}
+  else if(target==='rec'){dpY=recStartY||addDateY;dpM=recStartM||addDateM;dpD=recStartD||addDateD;}
   else{dpY=editDateY;dpM=editDateM;dpD=editDateD;}
   calNavY=dpY; calNavM=dpM;
   dialState={y:dpY,m:dpM,d:dpD};
@@ -616,6 +646,7 @@ function confirmDate(){
   if(dpMode==='cal'){/* dpY/M/D already set by cal tap */}
   else{dpY=dialState.y;dpM=dialState.m;dpD=dialState.d;}
   if(dpTarget==='add'){addDateY=dpY;addDateM=dpM;addDateD=dpD;document.getElementById('addDateLabel').textContent=fmtDateShort(dpY,dpM,dpD);}
+  else if(dpTarget==='rec'){recStartY=dpY;recStartM=dpM;recStartD=dpD;document.getElementById('recStartLabel').textContent=fmtDateShort(dpY,dpM,dpD);}
   else{editDateY=dpY;editDateM=dpM;editDateD=dpD;document.getElementById('editDateLabel').textContent=fmtDateShort(dpY,dpM,dpD);}
   closeDatePicker();
 }
@@ -913,6 +944,18 @@ function removeCat(type,idx){
 
 /* ══ Recurring transactions ══ */
 let recType='expense';
+let recFreq='monthly';
+let recStartY, recStartM, recStartD;
+
+function setRecFreq(freq){
+  recFreq=freq;
+  ['monthly','biweekly','weekly'].forEach(f=>{
+    document.getElementById('freq'+f.charAt(0).toUpperCase()+f.slice(1)).className='type-btn'+(freq===f?' on-b':'');
+  });
+  document.getElementById('recMonthlyRow').style.display=freq==='monthly'?'':'none';
+  document.getElementById('recWeeklyRow').style.display=freq!=='monthly'?'':'none';
+  document.getElementById('recStartRow').style.display=freq!=='monthly'?'':'none';
+}
 function setRecType(type){
   recType=type;
   document.getElementById('recTypeIncome').className='type-btn'+(type==='income'?' on-g':'');
@@ -923,19 +966,25 @@ function setRecType(type){
   const cats=type==='income'?s.income:type==='savings'?s.savings:s.expense;
   document.getElementById('recCat').innerHTML=cats.map(c=>`<option value="${c.n}">${c.i} ${c.n}</option>`).join('');
 }
-function populateRecSelect(){
-  setRecType(recType);
-}
+function populateRecSelect(){ setRecType(recType); }
+
 function addRecurring(){
   const cat=document.getElementById('recCat').value;
   const desc=document.getElementById('recDesc').value.trim();
   const amt=parseFloat(document.getElementById('recAmt').value);
-  const day=parseInt(document.getElementById('recDay').value);
   if(!cat){showToast('Pick a category');return;}
   if(!amt||amt<=0){showToast('Enter an amount');return;}
-  if(!day||day<1||day>31){showToast('Day must be 1–31');return;}
+  const rec={type:recType,cat,desc,amt,freq:recFreq,id:Date.now()};
+  if(recFreq==='monthly'){
+    const day=parseInt(document.getElementById('recDay').value);
+    if(!day||day<1||day>31){showToast('Day must be 1–31');return;}
+    rec.day=day;
+  } else {
+    rec.dow=parseInt(document.getElementById('recDow').value);
+    rec.startY=recStartY; rec.startM=recStartM; rec.startD=recStartD;
+  }
   const recs=getRecurring();
-  recs.push({type:recType,cat,desc,amt,day,id:Date.now()});
+  recs.push(rec);
   saveRecurring(recs);
   document.getElementById('recDesc').value='';
   document.getElementById('recAmt').value='';
@@ -949,6 +998,17 @@ function removeRecurring(id){
   renderRecurringList();
   showToast('Removed');
 }
+
+const DOW_NAMES=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const DOW_FULL=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+function recFreqLabel(r){
+  if(!r.freq||r.freq==='monthly') return `Monthly · day ${r.day}`;
+  const dow=DOW_FULL[r.dow]||'';
+  if(r.freq==='weekly') return `Every week · ${dow}`;
+  return `Every 2 weeks · ${dow}`;
+}
+
 function renderRecurringList(){
   const el=document.getElementById('recList');
   if(!el) return;
@@ -961,39 +1021,81 @@ function renderRecurringList(){
     const catObj=cats.find(c=>c.n===r.cat)||{i:'📌'};
     const col=r.type==='income'?'var(--green)':r.type==='savings'?'var(--blue)':'var(--red)';
     const sub=r.desc||'';
+    const freq=r.freq||'monthly';
+    // Badge icon for frequency
+    const freqIcon=freq==='monthly'?'📅':freq==='weekly'?'🗓':'📆';
+    const freqTxt=recFreqLabel(r);
     return `<div class="rec-item">
-      <div class="rec-day-badge">
-        <div style="font-size:9px;color:var(--text3);line-height:1">day</div>
-        <div style="font-size:14px;font-weight:800;line-height:1.2">${r.day}</div>
+      <div class="rec-day-badge" style="${freq!=='monthly'?'font-size:18px;flex-direction:column;gap:1px':''}">
+        ${freq==='monthly'
+          ? `<div style="font-size:9px;color:var(--text3);line-height:1">day</div><div style="font-size:14px;font-weight:800;line-height:1.2">${r.day}</div>`
+          : `<div style="font-size:18px">${freqIcon}</div><div style="font-size:8px;color:var(--text3);text-align:center;line-height:1.2">${DOW_NAMES[r.dow]||''}</div>`
+        }
       </div>
       <div class="rec-info">
         <div class="rec-name">${catObj.i} ${r.cat}</div>
-        ${sub?`<div class="rec-sub">${sub}</div>`:''}
+        <div class="rec-sub">${freqTxt}${sub?' · '+sub:''}</div>
       </div>
       <span class="rec-amt" style="color:${col}">${fmt(r.amt)}</span>
       <button class="rec-del" onclick="removeRecurring(${r.id})" title="Delete">🗑️</button>
     </div>`;
   }).join('');
 }
+
+/* Returns all dates (as dateStr) in year/month that match a recurring rule */
+function getRecurringDatesForMonth(r, y, m){
+  const freq=r.freq||'monthly';
+  if(freq==='monthly'){
+    const day=Math.min(r.day, dim(m,y));
+    return [dateStr(y,m,day)];
+  }
+  // Weekly or biweekly: walk all days in month, pick matching dow
+  const dates=[];
+  const daysInM=dim(m,y);
+  // Build sorted list of matching weekdays
+  const candidates=[];
+  for(let d=1;d<=daysInM;d++){
+    if(new Date(y,m,d).getDay()===r.dow) candidates.push(d);
+  }
+  if(!candidates.length) return [];
+  if(freq==='weekly') return candidates.map(d=>dateStr(y,m,d));
+  // Biweekly: need a reference anchor date
+  // Use startY/M/D if available, otherwise use first occurrence globally (Jan 1 2020 + dow)
+  let anchorY=r.startY||2020, anchorM=r.startM||0, anchorD=r.startD||1;
+  // Find the first occurrence of r.dow on or after anchor
+  const anchorDate=new Date(anchorY,anchorM,anchorD);
+  const anchorDow=anchorDate.getDay();
+  const diff=(r.dow-anchorDow+7)%7;
+  const firstRef=new Date(anchorY,anchorM,anchorD+diff);
+  // Now filter candidates: a day qualifies if (date - firstRef) in days is divisible by 14
+  const MS_DAY=86400000;
+  return candidates.filter(d=>{
+    const dt=new Date(y,m,d);
+    const diffDays=Math.round((dt-firstRef)/MS_DAY);
+    return diffDays>=0 && diffDays%14===0;
+  }).map(d=>dateStr(y,m,d));
+}
+
 function injectRecurring(force){
   if(!force && getInjected()) return;
   const recs=getRecurring();
   if(!recs.length){if(force)showToast('No recurring set up','🔁');return;}
   const entries=getEntries();
-  const maxDay=dim(curMonth,curYear);
   let added=0;
   recs.forEach(r=>{
-    const day=Math.min(r.day,maxDay);
-    const ds=dateStr(curYear,curMonth,day);
-    // remove old auto-injected version of this recurring for this month
-    const existIdx=entries.findIndex(e=>e._recId===r.id);
-    if(existIdx>=0) entries.splice(existIdx,1);
-    entries.push({type:r.type,cat:r.cat,desc:r.desc,amt:r.amt,date:ds,ts:Date.now(),_rec:true,_recId:r.id});
-    added++;
+    // Remove all previously injected entries for this rule this month
+    for(let i=entries.length-1;i>=0;i--){
+      if(entries[i]._recId===r.id) entries.splice(i,1);
+    }
+    const dates=getRecurringDatesForMonth(r,curYear,curMonth);
+    dates.forEach(ds=>{
+      entries.push({type:r.type,cat:r.cat,desc:r.desc,amt:r.amt,date:ds,ts:Date.now(),_rec:true,_recId:r.id});
+      added++;
+    });
   });
   saveEntries(entries);
   setInjected();
-  if(force){renderSummary();showToast(`${added} recurring applied ✓`,'🔁');}
+  if(force){renderSummary();showToast(`${added} entr${added===1?'y':'ies'} applied ✓`,'🔁');}
 }
 
 /* ══ Import / Export ══ */
@@ -1137,10 +1239,12 @@ document.getElementById('customSavInp').addEventListener('keydown',e=>{if(e.key=
 const todayD=new Date();
 addDateY=todayD.getFullYear(); addDateM=todayD.getMonth(); addDateD=todayD.getDate();
 editDateY=addDateY; editDateM=addDateM; editDateD=addDateD;
+recStartY=addDateY; recStartM=addDateM; recStartD=addDateD;
 document.getElementById('addDateLabel').textContent='Today';
 document.getElementById('mname').textContent=MONTHS[curMonth]+' '+curYear;
 setType('expense');
 setRecType('expense');
+setRecFreq('monthly');
 </script>
 </body>
 </html>

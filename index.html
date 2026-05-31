@@ -177,7 +177,46 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .ei-edit{background:none;border:none;cursor:pointer;color:var(--text3);font-size:16px;padding:2px 0 2px 6px;line-height:1;flex-shrink:0}
 .ei-edit:active{color:var(--blue)}
 
-/* ── Edit modal ── */
+/* ── Summary view modes ── */
+.view-toggle{display:flex;gap:5px;margin-bottom:12px;background:var(--surface2);border-radius:var(--rs);padding:3px}
+.vt-btn{flex:1;height:32px;border:none;border-radius:calc(var(--rs) - 2px);background:none;color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;transition:background .15s,color .15s}
+.vt-btn.on{background:var(--surface);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.vt-btn:active{opacity:.8}
+
+/* Section blocks */
+.sum-section{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);overflow:hidden;margin-bottom:10px}
+.sum-sec-hdr{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;user-select:none}
+.sum-sec-hdr:active{background:var(--surface2)}
+.sum-sec-icon{font-size:18px;width:22px;text-align:center;flex-shrink:0}
+.sum-sec-name{font-size:14px;font-weight:700;flex:1}
+.sum-sec-total{font-size:15px;font-weight:800;flex-shrink:0}
+.sum-sec-chevron{color:var(--text3);font-size:12px;flex-shrink:0;transition:transform .2s}
+.sum-sec-chevron.open{transform:rotate(180deg)}
+.sum-sec-body{display:none}
+.sum-sec-body.open{display:block}
+
+/* Category rows within section view */
+.sum-cat-hdr{display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:1px solid var(--border);cursor:pointer;user-select:none;background:var(--surface2)}
+.sum-cat-hdr:active{opacity:.8}
+.sum-cat-icon{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+.sum-cat-name{font-size:13px;font-weight:600;flex:1}
+.sum-cat-total{font-size:13px;font-weight:700;flex-shrink:0;margin-right:4px}
+.sum-cat-count{font-size:11px;color:var(--text3);flex-shrink:0;margin-right:6px}
+.sum-cat-chevron{color:var(--text3);font-size:10px;flex-shrink:0;transition:transform .2s}
+.sum-cat-chevron.open{transform:rotate(180deg)}
+.sum-cat-entries{display:none}
+.sum-cat-entries.open{display:block}
+
+/* Mini bar inside section header */
+.sum-sec-minibar{height:3px;background:var(--surface2);display:flex;overflow:hidden}
+.sum-sec-minibar-fill{height:3px;transition:width .35s}
+
+/* ── Category filter bar ── */
+.cat-filter-bar{padding:10px 14px;border-top:1px solid var(--border);display:flex;align-items:center;gap:8px;background:var(--surface)}
+.cat-filter-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);flex-shrink:0}
+.cat-filter-sel{flex:1;height:36px;border:1.5px solid var(--border2);border-radius:var(--rs);background:var(--surface2);color:var(--text);font-size:13px;font-weight:600;padding:0 10px;cursor:pointer}
+.cat-filter-sel:focus{outline:none;border-color:var(--blue)}
+.cat-filter-summary{font-size:13px;flex-shrink:0;min-width:54px;text-align:right;line-height:1.3}
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:flex-end;justify-content:center}
 .overlay.hide{display:none}
 .modal{background:var(--surface);border-radius:var(--r) var(--r) 0 0;padding:20px 18px 32px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto}
@@ -297,7 +336,12 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
     <div class="bar-track"><div class="bar-g" id="barG" style="width:33%"></div><div class="bar-b" id="barB" style="width:34%"></div><div class="bar-r" id="barR" style="width:33%"></div></div>
     <div class="bar-note" id="barNote"></div>
   </div>
-  <div class="card" id="unifiedList"></div>
+  <div class="view-toggle">
+    <button class="vt-btn on" id="vtAll"      onclick="setViewMode('all')">All</button>
+    <button class="vt-btn"   id="vtSection"   onclick="setViewMode('section')">By Section</button>
+    <button class="vt-btn"   id="vtCategory"  onclick="setViewMode('category')">By Category</button>
+  </div>
+  <div id="summaryListWrap"></div>
 </div>
 
 <!-- ══ SETUP PAGE ══ -->
@@ -769,6 +813,16 @@ function submitEntry(){
 }
 
 /* ══ Summary ══ */
+let summaryViewMode='all';
+function setViewMode(mode){
+  summaryViewMode=mode;
+  ['all','section','category'].forEach(m=>{
+    document.getElementById('vt'+m.charAt(0).toUpperCase()+m.slice(1)).classList.toggle('on',m===mode);
+  });
+  const entries=getEntries();
+  renderSummaryList(entries);
+}
+
 function renderSummary(){
   injectRecurring(false);
   const entries=getEntries();
@@ -793,11 +847,36 @@ function renderSummary(){
   if(total===0){noteEl.textContent='';}
   else if(net>=0){noteEl.style.color='var(--green)';noteEl.textContent='▲ '+fmt(net)+' surplus';}
   else{noteEl.style.color='var(--red)';noteEl.textContent='▼ '+fmt(Math.abs(net))+' shortfall';}
-  renderUnifiedList(entries);
+  renderSummaryList(entries);
 }
-function renderUnifiedList(entries){
-  const el=document.getElementById('unifiedList');
-  if(!entries.length){el.innerHTML='<div class="empty-msg">No entries yet — add some!</div>';return;}
+
+function renderSummaryList(entries){
+  if(summaryViewMode==='all') renderAllView(entries);
+  else if(summaryViewMode==='section') renderSectionView(entries,false);
+  else renderSectionView(entries,true);
+}
+
+/* ── helpers shared across views ── */
+function entryItemHtml(e,s){
+  const cats=e.type==='income'?s.income:e.type==='savings'?(s.savings||[]):s.expense;
+  const catObj=cats.find(c=>c.n===e.cat)||{i:'📌'};
+  const col=e.type==='income'?'var(--green)':e.type==='savings'?'var(--blue)':'var(--red)';
+  const src=e.desc?`<div class="ei-src">${e.desc}${e._rec?' 🔁':''}</div>`:(e._rec?'<div class="ei-src">🔁 recurring</div>':'');
+  const badgeCls=e.type==='income'?'inc':e.type==='savings'?'sav':'exp';
+  const badgeLbl=e.type==='income'?'income':e.type==='savings'?'savings':'expense';
+  const badge=`<span class="ei-type-badge ${badgeCls}">${badgeLbl}</span>`;
+  return `<div class="entry-item ${e.type==='income'?'inc':e.type==='savings'?'sav':'exp'}">
+    <span class="ei-icon">${catObj.i}</span>
+    <div class="ei-info"><div class="ei-cat">${e.cat}</div>${src}</div>
+    <div class="ei-right"><span class="ei-amt" style="color:${col}">${fmt(e.amt)}</span>${badge}</div>
+    <button class="ei-edit" onclick="openEdit(${e._i})">✏️</button>
+  </div>`;
+}
+
+/* ── All view (date-grouped) ── */
+function renderAllView(entries){
+  const wrap=document.getElementById('summaryListWrap');
+  if(!entries.length){wrap.innerHTML='<div class="card"><div class="empty-msg">No entries yet — add some!</div></div>';return;}
   const s=getSetup();
   const sorted=[...entries].map((e,i)=>({...e,_i:i})).sort((a,b)=>{
     if(b.date!==a.date) return b.date.localeCompare(a.date);
@@ -805,27 +884,120 @@ function renderUnifiedList(entries){
   });
   const groups={};
   sorted.forEach(e=>{groups[e.date]=groups[e.date]||[];groups[e.date].push(e);});
-  let html='';
+  let html='<div class="card">';
   Object.keys(groups).sort((a,b)=>b.localeCompare(a)).forEach(date=>{
     html+=`<div class="date-group-lbl">${fmtDate(date)}</div>`;
-    groups[date].forEach(e=>{
-      const cats=e.type==='income'?s.income:e.type==='savings'?(s.savings||[]):s.expense;
-      const catObj=cats.find(c=>c.n===e.cat)||{i:'📌'};
-      const col=e.type==='income'?'var(--green)':e.type==='savings'?'var(--blue)':'var(--red)';
-      const src=e.desc?`<div class="ei-src">${e.desc}${e._rec?' 🔁':''}</div>`:(e._rec?'<div class="ei-src">🔁 recurring</div>':'');
-      const badgeCls=e.type==='income'?'inc':e.type==='savings'?'sav':'exp';
-      const badgeLbl=e.type==='income'?'income':e.type==='savings'?'savings':'expense';
-      const badge=`<span class="ei-type-badge ${badgeCls}">${badgeLbl}</span>`;
-      html+=`<div class="entry-item ${e.type==='income'?'inc':e.type==='savings'?'sav':'exp'}">
-        <span class="ei-icon">${catObj.i}</span>
-        <div class="ei-info"><div class="ei-cat">${e.cat}</div>${src}</div>
-        <div class="ei-right"><span class="ei-amt" style="color:${col}">${fmt(e.amt)}</span>${badge}</div>
-        <button class="ei-edit" onclick="openEdit(${e._i})">✏️</button>
-      </div>`;
-    });
+    groups[date].forEach(e=>{ html+=entryItemHtml(e,s); });
   });
-  el.innerHTML=html;
+  html+='</div>';
+  wrap.innerHTML=html;
 }
+
+/* ── Section view & Category view ── */
+const SEC_DEFS=[
+  {type:'income', label:'Income',   icon:'📥', col:'var(--green)'},
+  {type:'expense',label:'Expenses', icon:'📤', col:'var(--red)'},
+  {type:'savings',label:'Savings',  icon:'🏦', col:'var(--blue)'},
+];
+
+// track open state across re-renders
+const _secOpen={income:true,expense:true,savings:true};
+// selected category filter per section (null = all)
+const _catFilter={income:null,expense:null,savings:null};
+
+function renderSectionView(entries,showCatFilter){
+  const wrap=document.getElementById('summaryListWrap');
+  if(!entries.length){wrap.innerHTML='<div class="card"><div class="empty-msg">No entries yet — add some!</div></div>';return;}
+  const s=getSetup();
+  const indexed=[...entries].map((e,i)=>({...e,_i:i}));
+  const grandTotal=entries.reduce((a,e)=>a+e.amt,0);
+
+  let html='';
+  SEC_DEFS.forEach(sec=>{
+    const secEntries=indexed.filter(e=>e.type===sec.type);
+    if(!secEntries.length) return;
+    const secTotal=secEntries.reduce((a,e)=>a+e.amt,0);
+    const pct=grandTotal>0?Math.round(secTotal/grandTotal*100):0;
+    const isOpen=_secOpen[sec.type];
+
+    // Build category list for dropdown
+    const catGroups={};
+    secEntries.forEach(e=>{catGroups[e.cat]=catGroups[e.cat]||[];catGroups[e.cat].push(e);});
+    const catNames=Object.keys(catGroups).sort();
+    const cats=sec.type==='income'?s.income:sec.type==='savings'?(s.savings||[]):s.expense;
+
+    // Apply filter
+    const selectedCat=_catFilter[sec.type];
+    const filteredEntries=selectedCat
+      ? secEntries.filter(e=>e.cat===selectedCat)
+      : secEntries;
+    const filteredTotal=filteredEntries.reduce((a,e)=>a+e.amt,0);
+
+    // Dropdown options
+    const ddOptions=`<option value="">All categories</option>`
+      + catNames.map(cat=>{
+          const catObj=cats.find(c=>c.n===cat)||{i:'📌'};
+          const t=catGroups[cat].reduce((a,e)=>a+e.amt,0);
+          return `<option value="${cat.replace(/"/g,'&quot;')}" ${selectedCat===cat?'selected':''}>${catObj.i} ${cat} — ${fmt(t)}</option>`;
+        }).join('');
+
+    const filterSummary=selectedCat
+      ? `<span style="font-weight:700;color:${sec.col}">${fmt(filteredTotal)}</span><span style="color:var(--text3);font-size:11px;display:block">${filteredEntries.length} entr${filteredEntries.length===1?'y':'ies'}</span>`
+      : `${catNames.length} cat${catNames.length===1?'':'s'}`;
+
+    html+=`<div class="sum-section">
+      <div class="sum-sec-hdr" onclick="toggleSection('${sec.type}')">
+        <span class="sum-sec-icon">${sec.icon}</span>
+        <span class="sum-sec-name">${sec.label}</span>
+        <span class="sum-sec-total" style="color:${sec.col}">${selectedCat ? fmt(filteredTotal)+' <span style="font-weight:400;font-size:11px;color:var(--text3)">of '+fmt(secTotal)+'</span>' : fmt(secTotal)}</span>
+        <span class="sum-sec-chevron${isOpen?' open':''}">▼</span>
+      </div>
+      <div class="sum-sec-minibar"><div class="sum-sec-minibar-fill" style="width:${pct}%;background:${sec.col}"></div></div>
+      <div class="sum-sec-body${isOpen?' open':''}" id="secBody_${sec.type}">`;
+
+    if(showCatFilter){
+      html+=`<div class="cat-filter-bar">
+        <span class="cat-filter-lbl">Category</span>
+        <select class="cat-filter-sel" onchange="setCatFilter('${sec.type}',this.value)">${ddOptions}</select>
+        <span class="cat-filter-summary">${filterSummary}</span>
+      </div>`;
+    }
+
+    // Entries (filtered)
+    const sorted=filteredEntries.slice().sort((a,b)=>b.date.localeCompare(a.date)||(b.ts||0)-(a.ts||0));
+    if(!sorted.length){
+      html+=`<div class="empty-msg" style="padding:14px">No entries for this category</div>`;
+    } else {
+      const groups={};
+      sorted.forEach(e=>{groups[e.date]=groups[e.date]||[];groups[e.date].push(e);});
+      Object.keys(groups).sort((a,b)=>b.localeCompare(a)).forEach(date=>{
+        html+=`<div class="date-group-lbl">${fmtDate(date)}</div>`;
+        groups[date].forEach(e=>{ html+=entryItemHtml(e,s); });
+      });
+    }
+
+    html+=`</div></div>`;
+  });
+  wrap.innerHTML=html;
+}
+
+function setCatFilter(secType, cat){
+  _catFilter[secType]=cat||null;
+  // Re-render without losing open states
+  renderSummaryList(getEntries());
+}
+
+function toggleSection(type){
+  _secOpen[type]=!_secOpen[type];
+  const body=document.getElementById('secBody_'+type);
+  if(!body) return;
+  body.classList.toggle('open',_secOpen[type]);
+  const hdr=body.closest('.sum-section').querySelector('.sum-sec-chevron');
+  if(hdr) hdr.classList.toggle('open',_secOpen[type]);
+}
+
+// keep renderUnifiedList alias so older calls don't break
+function renderUnifiedList(entries){ renderAllView(entries); }
 
 /* ══ Edit modal ══ */
 function setEditType(type){

@@ -211,7 +211,14 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .sum-sec-minibar{height:3px;background:var(--surface2);display:flex;overflow:hidden}
 .sum-sec-minibar-fill{height:3px;transition:width .35s}
 
-/* ── Category filter bar ── */
+/* ── Edit Recurring Modal ── */
+.rec-edit-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:flex-end;justify-content:center}
+.rec-edit-sheet{background:var(--surface);border-radius:20px 20px 0 0;padding:20px 16px 32px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto}
+.rec-edit-title{font-size:16px;font-weight:800;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
+.rec-edit-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--text3);padding:0 4px}
+.rec-edit-actions{display:flex;gap:8px;margin-top:16px}
+.rec-edit-save{flex:1;height:46px;border-radius:var(--rs);border:none;background:var(--blue);color:#fff;font-size:14px;font-weight:700;cursor:pointer}
+.rec-edit-del{height:46px;width:52px;border-radius:var(--rs);border:1.5px solid var(--red-l);background:var(--red-l);color:var(--red);font-size:18px;cursor:pointer}
 .cat-filter-bar{padding:10px 14px;border-top:1px solid var(--border);display:flex;align-items:center;gap:8px;background:var(--surface)}
 .cat-filter-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);flex-shrink:0}
 .cat-filter-sel{flex:1;height:36px;border:1.5px solid var(--border2);border-radius:var(--rs);background:var(--surface2);color:var(--text);font-size:13px;font-weight:600;padding:0 10px;cursor:pointer}
@@ -381,7 +388,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
   <!-- Recurring Transactions -->
   <div class="sec-hdr" style="margin-top:6px"><div class="sec-icon" style="background:var(--surface2);font-size:16px">🔁</div><span class="sec-lbl">Recurring transactions</span></div>
   <p class="setup-intro" style="margin-bottom:10px">These auto-add to each month when you open the Summary. Weekly/biweekly rules create multiple entries per month.</p>
-  <button class="rec-inject-btn" onclick="injectRecurring(true)">↻ Re-apply recurring to this month</button>
+  <button class="rec-inject-btn" onclick="injectRecurring(true)">↻ Force-add all recurring for this month</button>
   <div class="card" id="recList"><div class="empty-msg">No recurring transactions yet</div></div>
   <div class="rec-add-form">
     <div class="rec-add-title">Add recurring transaction</div>
@@ -1194,11 +1201,10 @@ function renderRecurringList(){
     const col=r.type==='income'?'var(--green)':r.type==='savings'?'var(--blue)':'var(--red)';
     const sub=r.desc||'';
     const freq=r.freq||'monthly';
-    // Badge icon for frequency
     const freqIcon=freq==='monthly'?'📅':freq==='weekly'?'🗓':'📆';
     const freqTxt=recFreqLabel(r);
     return `<div class="rec-item">
-      <div class="rec-day-badge" style="${freq!=='monthly'?'font-size:18px;flex-direction:column;gap:1px':''}">
+      <div class="rec-day-badge" style="${freq!=='monthly'?'flex-direction:column;gap:1px':''}">
         ${freq==='monthly'
           ? `<div style="font-size:9px;color:var(--text3);line-height:1">day</div><div style="font-size:14px;font-weight:800;line-height:1.2">${r.day}</div>`
           : `<div style="font-size:18px">${freqIcon}</div><div style="font-size:8px;color:var(--text3);text-align:center;line-height:1.2">${DOW_NAMES[r.dow]||''}</div>`
@@ -1221,25 +1227,18 @@ function getRecurringDatesForMonth(r, y, m){
     const day=Math.min(r.day, dim(m,y));
     return [dateStr(y,m,day)];
   }
-  // Weekly or biweekly: walk all days in month, pick matching dow
-  const dates=[];
   const daysInM=dim(m,y);
-  // Build sorted list of matching weekdays
   const candidates=[];
   for(let d=1;d<=daysInM;d++){
     if(new Date(y,m,d).getDay()===r.dow) candidates.push(d);
   }
   if(!candidates.length) return [];
   if(freq==='weekly') return candidates.map(d=>dateStr(y,m,d));
-  // Biweekly: need a reference anchor date
-  // Use startY/M/D if available, otherwise use first occurrence globally (Jan 1 2020 + dow)
   let anchorY=r.startY||2020, anchorM=r.startM||0, anchorD=r.startD||1;
-  // Find the first occurrence of r.dow on or after anchor
   const anchorDate=new Date(anchorY,anchorM,anchorD);
   const anchorDow=anchorDate.getDay();
   const diff=(r.dow-anchorDow+7)%7;
   const firstRef=new Date(anchorY,anchorM,anchorD+diff);
-  // Now filter candidates: a day qualifies if (date - firstRef) in days is divisible by 14
   const MS_DAY=86400000;
   return candidates.filter(d=>{
     const dt=new Date(y,m,d);
@@ -1249,24 +1248,29 @@ function getRecurringDatesForMonth(r, y, m){
 }
 
 function injectRecurring(force){
-  if(!force && getInjected()) return;
   const recs=getRecurring();
   if(!recs.length){if(force)showToast('No recurring set up','🔁');return;}
   const entries=getEntries();
+  const todayStr=dateStr(now.getFullYear(),now.getMonth(),now.getDate());
   let added=0;
   recs.forEach(r=>{
-    // Remove all previously injected entries for this rule this month
-    for(let i=entries.length-1;i>=0;i--){
-      if(entries[i]._recId===r.id) entries.splice(i,1);
-    }
-    const dates=getRecurringDatesForMonth(r,curYear,curMonth);
-    dates.forEach(ds=>{
+    // Get all dates this rule fires this month
+    const allDates=getRecurringDatesForMonth(r,curYear,curMonth);
+    allDates.forEach(ds=>{
+      // Today-only: only inject if the date is today or in the past (already passed this month)
+      // When force=true (manual button), inject all dates for the month regardless
+      const shouldInject=force || ds<=todayStr;
+      if(!shouldInject) return;
+      // Check if already injected for this rule+date
+      const alreadyExists=entries.some(e=>e._recId===r.id && e.date===ds);
+      if(alreadyExists) return;
       entries.push({type:r.type,cat:r.cat,desc:r.desc,amt:r.amt,date:ds,ts:Date.now(),_rec:true,_recId:r.id});
       added++;
     });
   });
-  saveEntries(entries);
-  setInjected();
+  if(added>0){
+    saveEntries(entries);
+  }
   if(force){renderSummary();showToast(`${added} entr${added===1?'y':'ies'} applied ✓`,'🔁');}
 }
 

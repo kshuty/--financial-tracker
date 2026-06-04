@@ -428,6 +428,14 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
         <span class="rec-note">Day 1–31. Shorter months use the last available day.</span>
       </div>
     </div>
+    <div class="rec-row" id="recStartRow" style="display:none">
+      <div class="form-lbl">Starting from</div>
+      <button class="date-trigger" id="recStartTrigger" onclick="openDatePicker('rec')">
+        <span class="date-trigger-icon">📅</span>
+        <span class="date-trigger-text" id="recStartLabel">Today</span>
+        <span class="date-trigger-arrow">▾</span>
+      </button>
+    </div>
     <!-- Weekly / Biweekly: day of week + start date -->
     <div class="rec-row" id="recWeeklyRow" style="display:none">
       <div class="form-lbl">Day of week</div>

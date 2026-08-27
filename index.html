@@ -211,6 +211,17 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .sum-sec-minibar{height:3px;background:var(--surface2);display:flex;overflow:hidden}
 .sum-sec-minibar-fill{height:3px;transition:width .35s}
 
+/* ── INSIGHTS PAGE ── */
+.insight-row{padding:12px 14px;border-bottom:1px solid var(--border)}
+.insight-row:last-child{border-bottom:none}
+.insight-row-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.insight-month{font-size:13px;font-weight:700}
+.insight-sub{font-size:10px;color:var(--text3);margin-top:2px}
+.insight-net{font-size:13px;font-weight:700}
+.insight-legend{display:flex;gap:14px;margin:2px 0 14px;padding:0 2px}
+.insight-legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2);font-weight:600}
+.insight-legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
 /* ── Edit Recurring Modal ── */
 .rec-edit-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:flex-end;justify-content:center}
 .rec-edit-sheet{background:var(--surface);border-radius:20px 20px 0 0;padding:20px 16px 32px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto}
@@ -351,6 +362,29 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
   <div id="summaryListWrap"></div>
 </div>
 
+<!-- ══ INSIGHTS PAGE ══ -->
+<div class="page" id="pageInsights">
+  <div class="stat-strip" style="margin-top:10px">
+    <div class="stat"><div class="stat-l">Avg income</div><div class="stat-v" id="iAvgInc" style="color:var(--green)">$0</div></div>
+    <div class="stat"><div class="stat-l">Avg expenses</div><div class="stat-v" id="iAvgExp" style="color:var(--red)">$0</div></div>
+  </div>
+  <div class="stat-strip-2">
+    <div class="stat"><div class="stat-l">Avg savings</div><div class="stat-v" id="iAvgSav" style="color:var(--blue)">$0</div></div>
+    <div class="stat"><div class="stat-l">Avg net</div><div class="stat-v" id="iAvgNet">$0</div></div>
+  </div>
+  <div class="view-toggle">
+    <button class="vt-btn" id="irBtn3" onclick="setInsightsRange(3)">3 mo</button>
+    <button class="vt-btn on" id="irBtn6" onclick="setInsightsRange(6)">6 mo</button>
+    <button class="vt-btn" id="irBtn12" onclick="setInsightsRange(12)">12 mo</button>
+  </div>
+  <div class="insight-legend">
+    <div class="insight-legend-item"><span class="insight-legend-dot" style="background:var(--green)"></span>Income</div>
+    <div class="insight-legend-item"><span class="insight-legend-dot" style="background:var(--blue)"></span>Savings</div>
+    <div class="insight-legend-item"><span class="insight-legend-dot" style="background:var(--red)"></span>Expenses</div>
+  </div>
+  <div id="insightsListWrap"></div>
+</div>
+
 <!-- ══ SETUP PAGE ══ -->
 <div class="page" id="pageSetup">
   <p class="setup-intro" style="margin-top:10px">Tap an emoji to change it. Drag ☰ to reorder. Tap ✕ to remove.</p>
@@ -457,10 +491,12 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
   <div class="sec-hdr" style="margin-top:6px"><div class="sec-icon" style="background:var(--surface2);font-size:16px">💾</div><span class="sec-lbl">Backup & restore</span></div>
   <div class="card" style="padding:16px;margin-bottom:14px">
     <p style="font-size:13px;color:var(--text2);line-height:1.5;margin-bottom:14px">Export all your data to a JSON file for safekeeping or moving to a new device. Import to restore from a previous backup.</p>
-    <div style="display:flex;gap:8px">
+    <div style="display:flex;gap:8px;margin-bottom:8px">
       <button onclick="exportData()" style="flex:1;height:44px;border-radius:var(--rs);border:none;background:var(--blue);color:#fff;font-size:14px;font-weight:700;cursor:pointer">📤 Export backup</button>
       <button onclick="importData()" style="flex:1;height:44px;border-radius:var(--rs);border:1.5px solid var(--border2);background:var(--surface2);color:var(--text);font-size:14px;font-weight:600;cursor:pointer">📥 Import backup</button>
     </div>
+    <p style="font-size:12px;color:var(--text3);line-height:1.5;margin-bottom:8px">Export every transaction (all months) as a spreadsheet-friendly CSV file.</p>
+    <button onclick="exportCSV()" style="width:100%;height:44px;border-radius:var(--rs);border:1.5px solid var(--border2);background:var(--surface2);color:var(--text);font-size:14px;font-weight:600;cursor:pointer">📄 Export CSV</button>
   </div>
 </div>
 
@@ -475,6 +511,10 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
   <button class="tb" id="tbSummary" onclick="switchTab('summary')">
     <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
     Summary
+  </button>
+  <button class="tb" id="tbInsights" onclick="switchTab('insights')">
+    <svg viewBox="0 0 24 24"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/></svg>
+    Insights
   </button>
   <button class="tb" id="tbSetup" onclick="switchTab('setup')">
     <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -862,6 +902,68 @@ function renderSummaryList(entries){
   if(summaryViewMode==='all') renderAllView(entries);
   else if(summaryViewMode==='section') renderSectionView(entries,false);
   else renderSectionView(entries,true);
+}
+
+/* ══ Insights ══ */
+let insightsRange=6;
+function setInsightsRange(n){
+  insightsRange=n;
+  [3,6,12].forEach(v=>{
+    document.getElementById('irBtn'+v).classList.toggle('on',v===n);
+  });
+  renderInsights();
+}
+function renderInsights(){
+  const today=new Date();
+  const months=[];
+  for(let i=insightsRange-1;i>=0;i--){
+    const d=new Date(today.getFullYear(),today.getMonth()-i,1);
+    months.push({y:d.getFullYear(),m:d.getMonth()});
+  }
+  const rows=months.map(({y,m})=>{
+    const entries=load('entries_'+y+'_'+m)||[];
+    const inc=entries.filter(e=>e.type==='income').reduce((a,e)=>a+e.amt,0);
+    const exp=entries.filter(e=>e.type==='expense').reduce((a,e)=>a+e.amt,0);
+    const sav=entries.filter(e=>e.type==='savings').reduce((a,e)=>a+e.amt,0);
+    return {y,m,inc,exp,sav,net:inc-exp-sav};
+  });
+
+  const n=rows.length||1;
+  const avgInc=rows.reduce((a,r)=>a+r.inc,0)/n;
+  const avgExp=rows.reduce((a,r)=>a+r.exp,0)/n;
+  const avgSav=rows.reduce((a,r)=>a+r.sav,0)/n;
+  const avgNet=rows.reduce((a,r)=>a+r.net,0)/n;
+  document.getElementById('iAvgInc').textContent=fmt(avgInc);
+  document.getElementById('iAvgExp').textContent=fmt(avgExp);
+  document.getElementById('iAvgSav').textContent=fmt(avgSav);
+  const netEl=document.getElementById('iAvgNet');
+  netEl.textContent=fmt(avgNet);
+  netEl.style.color=avgNet>=0?'var(--green)':'var(--red)';
+
+  const wrap=document.getElementById('insightsListWrap');
+  if(rows.every(r=>r.inc===0&&r.exp===0&&r.sav===0)){
+    wrap.innerHTML='<div class="card"><div class="empty-msg">No data yet for this range</div></div>';
+    return;
+  }
+  let html='<div class="card">';
+  rows.forEach(r=>{
+    const total=r.inc+r.exp+r.sav;
+    const gw=total?Math.round(r.inc/total*100):0;
+    const bw=total?Math.round(r.sav/total*100):0;
+    const rw=total?100-gw-bw:0;
+    html+=`<div class="insight-row">
+      <div class="insight-row-top">
+        <span>
+          <span class="insight-month">${MS[r.m]} ${r.y}</span>
+          <div class="insight-sub">${fmt(r.inc)} in · ${fmt(r.exp+r.sav)} out</div>
+        </span>
+        <span class="insight-net" style="color:${r.net>=0?'var(--green)':'var(--red)'}">${r.net>=0?'+':'−'}${fmt(Math.abs(r.net))}</span>
+      </div>
+      <div class="bar-track"><div class="bar-g" style="width:${gw}%"></div><div class="bar-b" style="width:${bw}%"></div><div class="bar-r" style="width:${rw}%"></div></div>
+    </div>`;
+  });
+  html+='</div>';
+  wrap.innerHTML=html;
 }
 
 /* ── helpers shared across views ── */
@@ -1296,6 +1398,49 @@ function exportData(){
   URL.revokeObjectURL(url);
   showToast('Backup downloaded ✓','💾');
 }
+function csvEscape(val){
+  const s=String(val==null?'':val);
+  return /[",\r\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s;
+}
+function exportCSV(){
+  const s=getSetup();
+  const iconFor=(type,cat)=>{
+    const cats=type==='income'?s.income:type==='savings'?(s.savings||[]):s.expense;
+    return (cats.find(c=>c.n===cat)||{}).i||'';
+  };
+  const monthKeys=Object.keys(localStorage).filter(k=>k.startsWith('mt_entries_'));
+  let all=[];
+  monthKeys.forEach(k=>{
+    let arr;
+    try{arr=JSON.parse(localStorage.getItem(k))||[];}catch(e){arr=[];}
+    arr.forEach(e=>all.push(e));
+  });
+  if(!all.length){showToast('No entries to export','⚠️');return;}
+  all.sort((a,b)=>{
+    if((a.date||'')!==(b.date||'')) return (a.date||'').localeCompare(b.date||'');
+    return (a.ts||0)-(b.ts||0);
+  });
+  const header=['Date','Type','Category','Icon','Description','Amount','Recurring'];
+  const rows=all.map(e=>[
+    e.date||'',
+    e.type||'',
+    e.cat||'',
+    iconFor(e.type,e.cat),
+    e.desc||'',
+    e.amt!=null?e.amt:'',
+    e._rec?'Yes':'No'
+  ]);
+  const csv=[header,...rows].map(r=>r.map(csvEscape).join(',')).join('\r\n');
+  const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  const d=new Date();
+  a.href=url;
+  a.download=`financial-tracker-export-${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('CSV exported ✓','📄');
+}
 function importData(){
   const inp=document.createElement('input');
   inp.type='file';inp.accept='.json,application/json';
@@ -1395,11 +1540,12 @@ function closeEmojiPicker(ev){if(ev&&ev.target!==document.getElementById('emojiO
 
 /* ══ Tabs & month ══ */
 function switchTab(tab){
-  ['add','summary','setup'].forEach(t=>{
+  ['add','summary','insights','setup'].forEach(t=>{
     document.getElementById('page'+t.charAt(0).toUpperCase()+t.slice(1)).classList.toggle('on',t===tab);
     document.getElementById('tb'+t.charAt(0).toUpperCase()+t.slice(1)).classList.toggle('on',t===tab);
   });
   if(tab==='summary')renderSummary();
+  if(tab==='insights')renderInsights();
   if(tab==='setup')renderSetup();
   if(tab==='add')populateAddSelect();
 }

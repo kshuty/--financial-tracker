@@ -221,6 +221,29 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .insight-legend{display:flex;gap:14px;margin:2px 0 14px;padding:0 2px}
 .insight-legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2);font-weight:600}
 .insight-legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.insight-cmp-row{padding:10px 14px}
+.insight-cmp-row:not(:last-child){border-bottom:1px solid var(--border)}
+.insight-cmp-top{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px}
+.insight-cmp-lbl{font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px}
+.insight-cmp-amt{font-size:13px;font-weight:800}
+.insight-cmp-pct{font-size:10px;font-weight:600;color:var(--text3);margin-left:4px}
+.insight-cmp-track{height:9px;border-radius:5px;background:var(--surface2);overflow:hidden}
+.insight-cmp-fill{height:9px;border-radius:5px;transition:width .35s}
+.insight-cat-row{display:flex;align-items:center;gap:8px;padding:8px 14px;border-bottom:1px solid var(--border)}
+.insight-cat-row:last-child{border-bottom:none}
+.insight-cat-icon{font-size:14px;width:18px;text-align:center;flex-shrink:0}
+.insight-cat-name{font-size:12px;font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.insight-cat-track{width:70px;height:6px;border-radius:3px;background:var(--surface2);overflow:hidden;flex-shrink:0}
+.insight-cat-fill{height:6px;border-radius:3px}
+.insight-cat-amt{font-size:12px;font-weight:700;width:64px;text-align:right;flex-shrink:0}
+.ess-mo-row{padding:9px 14px;border-bottom:1px solid var(--border)}
+.ess-mo-row:last-child{border-bottom:none}
+.ess-mo-top{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:5px;font-size:11px}
+.ess-mo-month{font-weight:700;color:var(--text)}
+.ess-mo-split{color:var(--text3);font-weight:600}
+.ess-mo-track{height:8px;border-radius:4px;background:var(--surface2);overflow:hidden;display:flex}
+.ess-mo-e{height:8px;background:var(--blue)}
+.ess-mo-n{height:8px;background:var(--amber,#f59e0b)}
 
 /* ── Edit Recurring Modal ── */
 .rec-edit-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:flex-end;justify-content:center}
@@ -258,6 +281,9 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .setup-emoji-btn{font-size:18px;width:32px;height:32px;border-radius:6px;border:1.5px solid var(--border2);background:var(--surface2);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .setup-emoji-btn:active{background:var(--blue-l);border-color:var(--blue)}
 .setup-name{flex:1;font-size:13px;font-weight:500}
+.ess-pill{font-size:9.5px;font-weight:700;padding:4px 8px;border-radius:20px;border:1.5px solid;cursor:pointer;flex-shrink:0;white-space:nowrap;letter-spacing:.2px}
+.ess-pill.ess-on{color:var(--blue);border-color:var(--blue);background:var(--blue-l)}
+.ess-pill.ess-off{color:var(--text3);border-color:var(--border2);background:var(--surface2)}
 .setup-del{background:none;border:none;cursor:pointer;color:var(--text3);font-size:16px;padding:3px 2px;line-height:1;flex-shrink:0}
 .setup-del:active{color:var(--red)}
 .setup-add-area{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);padding:14px;margin-bottom:10px}
@@ -377,6 +403,16 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
     <button class="vt-btn on" id="irBtn6" onclick="setInsightsRange(6)">6 mo</button>
     <button class="vt-btn" id="irBtn12" onclick="setInsightsRange(12)">12 mo</button>
   </div>
+  <div class="sec-hdr" style="margin-top:2px"><div class="sec-icon b" style="font-size:15px">⚖️</div><span class="sec-lbl">Sections compared</span></div>
+  <div class="card" id="insightsCmpWrap"></div>
+
+  <div class="sec-hdr"><div class="sec-icon r" style="font-size:15px">🎯</div><span class="sec-lbl">Essential vs non-essential</span></div>
+  <div class="card" id="insightsEssWrap"></div>
+
+  <div class="sec-hdr"><div class="sec-icon r" style="font-size:15px">🏆</div><span class="sec-lbl">Top categories</span></div>
+  <div class="card" id="insightsTopCatWrap"></div>
+
+  <div class="sec-hdr"><div class="sec-icon g" style="font-size:15px">📅</div><span class="sec-lbl">By month</span></div>
   <div class="insight-legend">
     <div class="insight-legend-item"><span class="insight-legend-dot" style="background:var(--green)"></span>Income</div>
     <div class="insight-legend-item"><span class="insight-legend-dot" style="background:var(--blue)"></span>Savings</div>
@@ -399,6 +435,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
     </div>
   </div>
   <div class="sec-hdr"><div class="sec-icon r">📤</div><span class="sec-lbl">Expense categories</span></div>
+  <p style="font-size:11px;color:var(--text3);margin:-4px 0 8px;padding:0 2px">Tap a category's pill to mark it Essential or Non-essential — used on the Insights tab.</p>
   <div class="setup-cat-list" id="setupExpList"></div>
   <div class="setup-add-area">
     <div class="setup-add-title">Add expense category</div>
@@ -625,14 +662,14 @@ const DEFAULT_INC=[
   {n:'Gifts / cash received',i:'🎁'},{n:'Other income',i:'💰'},
 ];
 const DEFAULT_EXP=[
-  {n:'Rent / mortgage',i:'🏠'},{n:'Groceries',i:'🛒'},
-  {n:'Dining out / takeout',i:'🍔'},{n:'Gas / fuel',i:'⛽'},
-  {n:'Electricity & gas',i:'💡'},{n:'Internet & phone',i:'📱'},
-  {n:'Car payment',i:'🚗'},{n:'Car insurance',i:'🚙'},
-  {n:'Health insurance',i:'🏥'},{n:'Doctor / dental',i:'💊'},
-  {n:'Clothing',i:'👕'},{n:'Entertainment',i:'🎬'},
-  {n:'Streaming services',i:'📺'},{n:'Gym / fitness',i:'🏋️'},
-  {n:'Personal care',i:'🪥'},{n:'Miscellaneous',i:'📦'},
+  {n:'Rent / mortgage',i:'🏠',e:true},{n:'Groceries',i:'🛒',e:true},
+  {n:'Dining out / takeout',i:'🍔',e:false},{n:'Gas / fuel',i:'⛽',e:true},
+  {n:'Electricity & gas',i:'💡',e:true},{n:'Internet & phone',i:'📱',e:true},
+  {n:'Car payment',i:'🚗',e:true},{n:'Car insurance',i:'🚙',e:true},
+  {n:'Health insurance',i:'🏥',e:true},{n:'Doctor / dental',i:'💊',e:true},
+  {n:'Clothing',i:'👕',e:false},{n:'Entertainment',i:'🎬',e:false},
+  {n:'Streaming services',i:'📺',e:false},{n:'Gym / fitness',i:'🏋️',e:false},
+  {n:'Personal care',i:'🪥',e:false},{n:'Miscellaneous',i:'📦',e:false},
 ];
 const SUG_INC=['Capital gains','Pension / retirement','Social security','Unemployment','Alimony received','Child support received','Business income','Gig / contract work','Reimbursement','Government benefits','Royalties','Lottery / gambling'];
 const SUG_EXP=['Coffee & drinks','Alcohol','Water & trash','HOA fees','Home repairs','Property tax','Renters insurance','Public transit','Rideshare / taxi','Parking / tolls','Car maintenance','Prescriptions','Therapy / mental health','Haircut / salon','Makeup / beauty','Video games','Books / magazines','Hobbies','Sports / recreation','Pet food','Vet / pet care','Childcare / daycare','School / tuition','Kids activities','Gifts given','Charity / donations','Flights','Hotels / lodging','Vacation spending','Credit card payment','Student loan','Personal loan','Tax payment','Subscriptions'];
@@ -940,9 +977,112 @@ function renderInsights(){
   netEl.textContent=fmt(avgNet);
   netEl.style.color=avgNet>=0?'var(--green)':'var(--red)';
 
+  /* ── Sections compared (totals over range) ── */
+  const totInc=rows.reduce((a,r)=>a+r.inc,0);
+  const totExp=rows.reduce((a,r)=>a+r.exp,0);
+  const totSav=rows.reduce((a,r)=>a+r.sav,0);
+  const cmpWrap=document.getElementById('insightsCmpWrap');
+  const cmpMax=Math.max(totInc,totExp,totSav,1);
+  const cmpDefs=[
+    {lbl:'📥 Income',val:totInc,col:'var(--green)'},
+    {lbl:'📤 Expenses',val:totExp,col:'var(--red)'},
+    {lbl:'🏦 Savings',val:totSav,col:'var(--blue)'},
+  ];
+  const cmpTotal=totInc+totExp+totSav;
+  cmpWrap.innerHTML=cmpDefs.map(d=>{
+    const w=Math.round(d.val/cmpMax*100);
+    const pct=cmpTotal?Math.round(d.val/cmpTotal*100):0;
+    return `<div class="insight-cmp-row">
+      <div class="insight-cmp-top">
+        <span class="insight-cmp-lbl">${d.lbl}</span>
+        <span><span class="insight-cmp-amt" style="color:${d.col}">${fmt(d.val)}</span><span class="insight-cmp-pct">${pct}%</span></span>
+      </div>
+      <div class="insight-cmp-track"><div class="insight-cmp-fill" style="width:${w}%;background:${d.col}"></div></div>
+    </div>`;
+  }).join('');
+
+  /* ── Top categories (across all types, over range) ── */
+  const setup=getSetup();
+  const catTotals={};
+  months.forEach(({y,m})=>{
+    const entries=load('entries_'+y+'_'+m)||[];
+    entries.forEach(e=>{
+      const key=e.type+'|'+e.cat;
+      catTotals[key]=(catTotals[key]||0)+e.amt;
+    });
+  });
+  const topCats=Object.entries(catTotals).map(([key,val])=>{
+    const [type,cat]=key.split('|');
+    const cats=type==='income'?setup.income:type==='savings'?(setup.savings||[]):setup.expense;
+    const catObj=cats.find(c=>c.n===cat)||{i:'📌'};
+    const col=type==='income'?'var(--green)':type==='savings'?'var(--blue)':'var(--red)';
+    return {cat,val,icon:catObj.i,col};
+  }).sort((a,b)=>b.val-a.val).slice(0,6);
+  const topCatWrap=document.getElementById('insightsTopCatWrap');
+  if(!topCats.length){
+    topCatWrap.innerHTML='<div class="empty-msg">No entries yet for this range</div>';
+  }else{
+    const topMax=topCats[0].val||1;
+    topCatWrap.innerHTML=topCats.map(c=>`<div class="insight-cat-row">
+      <span class="insight-cat-icon">${c.icon}</span>
+      <span class="insight-cat-name">${c.cat}</span>
+      <div class="insight-cat-track"><div class="insight-cat-fill" style="width:${Math.round(c.val/topMax*100)}%;background:${c.col}"></div></div>
+      <span class="insight-cat-amt">${fmt(c.val)}</span>
+    </div>`).join('');
+  }
+
+  /* ── Essential vs non-essential (expenses only, over range) ── */
+  const essWrap=document.getElementById('insightsEssWrap');
+  let essTotal=0, nonTotal=0;
+  const monthlyEss=months.map(({y,m})=>{
+    const entries=load('entries_'+y+'_'+m)||[];
+    let e=0,ne=0;
+    entries.filter(en=>en.type==='expense').forEach(en=>{
+      const catObj=setup.expense.find(c=>c.n===en.cat);
+      if(catObj&&catObj.e) e+=en.amt; else ne+=en.amt;
+    });
+    essTotal+=e; nonTotal+=ne;
+    return {y,m,e,ne};
+  });
+  const essGrand=essTotal+nonTotal;
+  if(essGrand<=0){
+    essWrap.innerHTML='<div class="empty-msg">No expenses yet for this range</div>';
+  }else{
+    const essPct=Math.round(essTotal/essGrand*100);
+    const nonPct=100-essPct;
+    let essHtml=`<div class="insight-cmp-row">
+      <div class="insight-cmp-top">
+        <span class="insight-cmp-lbl">🔷 Essential</span>
+        <span><span class="insight-cmp-amt" style="color:var(--blue)">${fmt(essTotal)}</span><span class="insight-cmp-pct">${essPct}%</span></span>
+      </div>
+      <div class="insight-cmp-track"><div class="insight-cmp-fill" style="width:${essPct}%;background:var(--blue)"></div></div>
+    </div>
+    <div class="insight-cmp-row">
+      <div class="insight-cmp-top">
+        <span class="insight-cmp-lbl">🔶 Non-essential</span>
+        <span><span class="insight-cmp-amt" style="color:var(--amber,#f59e0b)">${fmt(nonTotal)}</span><span class="insight-cmp-pct">${nonPct}%</span></span>
+      </div>
+      <div class="insight-cmp-track"><div class="insight-cmp-fill" style="width:${nonPct}%;background:var(--amber,#f59e0b)"></div></div>
+    </div>`;
+    monthlyEss.forEach(r=>{
+      const tot=r.e+r.ne;
+      if(!tot) return;
+      const ew=Math.round(r.e/tot*100);
+      essHtml+=`<div class="ess-mo-row">
+        <div class="ess-mo-top">
+          <span class="ess-mo-month">${MS[r.m]} ${r.y}</span>
+          <span class="ess-mo-split">${fmt(r.e)} · ${fmt(r.ne)}</span>
+        </div>
+        <div class="ess-mo-track"><div class="ess-mo-e" style="width:${ew}%"></div><div class="ess-mo-n" style="width:${100-ew}%"></div></div>
+      </div>`;
+    });
+    essWrap.innerHTML=essHtml;
+  }
+
+  /* ── By-month list ── */
   const wrap=document.getElementById('insightsListWrap');
   if(rows.every(r=>r.inc===0&&r.exp===0&&r.sav===0)){
-    wrap.innerHTML='<div class="card"><div class="empty-msg">No data yet for this range</div></div>';
+    wrap.innerHTML='<div class="card"><div class="empty-msg">No entries yet — add some!</div></div>';
     return;
   }
   let html='<div class="card">';
@@ -1187,6 +1327,7 @@ function renderSetupList(type,cats){
         ontouchend="touchDragEnd(event)">☰</span>
       <button class="setup-emoji-btn" onclick="openEmojiPicker('${type}',${i})">${c.i}</button>
       <span class="setup-name">${c.n}</span>
+      ${type==='expense'?`<button class="ess-pill ${c.e?'ess-on':'ess-off'}" onclick="toggleEssential(${i})">${c.e?'Essential':'Non-essential'}</button>`:''}
       <button class="setup-del" onclick="removeCat('${type}',${i})">✕</button>
     </div>`).join('');
 }
@@ -1204,7 +1345,9 @@ function addSugCat(type,name){
   const s=getSetup();
   if(!s.savings) s.savings=JSON.parse(JSON.stringify(DEFAULT_SAV));
   if(s[type].find(c=>c.n===name)) return;
-  s[type].push({n:name,i:autoIcon(name)});
+  const cat={n:name,i:autoIcon(name)};
+  if(type==='expense') cat.e=false;
+  s[type].push(cat);
   saveSetup(s);renderSetup();populateAddSelect();showToast(name+' added');
 }
 function addCustomCat(type){
@@ -1215,13 +1358,21 @@ function addCustomCat(type){
   const s=getSetup();
   if(!s.savings) s.savings=JSON.parse(JSON.stringify(DEFAULT_SAV));
   if(s[type].find(c=>c.n.toLowerCase()===name.toLowerCase())){showToast('Already exists');return;}
-  s[type].push({n:name,i:autoIcon(name)});
+  const cat={n:name,i:autoIcon(name)};
+  if(type==='expense') cat.e=false;
+  s[type].push(cat);
   saveSetup(s);inp.value='';renderSetup();populateAddSelect();showToast(name+' added ✓');
 }
 function removeCat(type,idx){
   const s=getSetup();
   if(!s.savings) s.savings=JSON.parse(JSON.stringify(DEFAULT_SAV));
   s[type].splice(idx,1);saveSetup(s);renderSetup();populateAddSelect();
+}
+function toggleEssential(idx){
+  const s=getSetup();
+  if(!s.expense[idx]) return;
+  s.expense[idx].e=!s.expense[idx].e;
+  saveSetup(s);renderSetup();
 }
 
 /* ══ Recurring transactions ══ */

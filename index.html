@@ -221,6 +221,8 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .insight-legend{display:flex;gap:14px;margin:2px 0 14px;padding:0 2px}
 .insight-legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text2);font-weight:600}
 .insight-legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.insight-mpick{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.insight-msel{flex:1;height:36px;border-radius:var(--rs);border:1.5px solid var(--border2);color:var(--text);font-size:13px;font-weight:600;padding-left:12px;text-align:center;text-align-last:center}
 .insight-cmp-row{padding:10px 14px}
 .insight-cmp-row:not(:last-child){border-bottom:1px solid var(--border)}
 .insight-cmp-top{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px}
@@ -391,17 +393,26 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 <!-- ══ INSIGHTS PAGE ══ -->
 <div class="page" id="pageInsights">
   <div class="stat-strip" style="margin-top:10px">
-    <div class="stat"><div class="stat-l">Avg income</div><div class="stat-v" id="iAvgInc" style="color:var(--green)">$0</div></div>
-    <div class="stat"><div class="stat-l">Avg expenses</div><div class="stat-v" id="iAvgExp" style="color:var(--red)">$0</div></div>
+    <div class="stat"><div class="stat-l" id="iLblInc">Avg income</div><div class="stat-v" id="iAvgInc" style="color:var(--green)">$0</div></div>
+    <div class="stat"><div class="stat-l" id="iLblExp">Avg expenses</div><div class="stat-v" id="iAvgExp" style="color:var(--red)">$0</div></div>
   </div>
   <div class="stat-strip-2">
-    <div class="stat"><div class="stat-l">Avg savings</div><div class="stat-v" id="iAvgSav" style="color:var(--blue)">$0</div></div>
-    <div class="stat"><div class="stat-l">Avg net</div><div class="stat-v" id="iAvgNet">$0</div></div>
+    <div class="stat"><div class="stat-l" id="iLblSav">Avg savings</div><div class="stat-v" id="iAvgSav" style="color:var(--blue)">$0</div></div>
+    <div class="stat"><div class="stat-l" id="iLblNet">Avg net</div><div class="stat-v" id="iAvgNet">$0</div></div>
   </div>
   <div class="view-toggle">
+    <button class="vt-btn on" id="imodeMonth" onclick="setInsightsMode('month')">Month</button>
+    <button class="vt-btn" id="imodeTrend" onclick="setInsightsMode('trend')">Trend</button>
+  </div>
+  <div class="view-toggle" id="irWrap">
     <button class="vt-btn" id="irBtn3" onclick="setInsightsRange(3)">3 mo</button>
     <button class="vt-btn on" id="irBtn6" onclick="setInsightsRange(6)">6 mo</button>
     <button class="vt-btn" id="irBtn12" onclick="setInsightsRange(12)">12 mo</button>
+  </div>
+  <div class="insight-mpick" id="imWrap" style="display:none">
+    <button class="mnbtn" onclick="shiftInsightsMonth(-1)">&#8249;</button>
+    <select class="sel insight-msel" id="imSelect" onchange="pickInsightsMonth(this.value)"></select>
+    <button class="mnbtn" onclick="shiftInsightsMonth(1)">&#8250;</button>
   </div>
   <div class="sec-hdr" style="margin-top:2px"><div class="sec-icon b" style="font-size:15px">⚖️</div><span class="sec-lbl">Sections compared</span></div>
   <div class="card" id="insightsCmpWrap"></div>
@@ -412,6 +423,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
   <div class="sec-hdr"><div class="sec-icon r" style="font-size:15px">🏆</div><span class="sec-lbl">Top categories</span></div>
   <div class="card" id="insightsTopCatWrap"></div>
 
+  <div id="insByMonth">
   <div class="sec-hdr"><div class="sec-icon g" style="font-size:15px">📅</div><span class="sec-lbl">By month</span></div>
   <div class="insight-legend">
     <div class="insight-legend-item"><span class="insight-legend-dot" style="background:var(--green)"></span>Income</div>
@@ -419,6 +431,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
     <div class="insight-legend-item"><span class="insight-legend-dot" style="background:var(--red)"></span>Expenses</div>
   </div>
   <div id="insightsListWrap"></div>
+  </div>
 </div>
 
 <!-- ══ SETUP PAGE ══ -->
@@ -943,6 +956,8 @@ function renderSummaryList(entries){
 
 /* ══ Insights ══ */
 let insightsRange=6;
+let insightsMode='month';
+let insightsSel={y:new Date().getFullYear(),m:new Date().getMonth()};
 function setInsightsRange(n){
   insightsRange=n;
   [3,6,12].forEach(v=>{
@@ -950,12 +965,54 @@ function setInsightsRange(n){
   });
   renderInsights();
 }
+function setInsightsMode(mode){
+  insightsMode=mode;
+  document.getElementById('imodeTrend').classList.toggle('on',mode==='trend');
+  document.getElementById('imodeMonth').classList.toggle('on',mode==='month');
+  renderInsights();
+}
+function shiftInsightsMonth(dir){
+  const d=new Date(insightsSel.y,insightsSel.m+dir,1);
+  insightsSel={y:d.getFullYear(),m:d.getMonth()};
+  renderInsights();
+}
+function pickInsightsMonth(v){
+  const [y,m]=v.split('-').map(Number);
+  insightsSel={y,m};
+  renderInsights();
+}
+function buildInsightsMonthSelect(){
+  const sel=document.getElementById('imSelect');
+  const t=new Date();
+  const opts=[];
+  for(let i=-2;i<24;i++){
+    const d=new Date(t.getFullYear(),t.getMonth()-i,1);
+    opts.push({y:d.getFullYear(),m:d.getMonth()});
+  }
+  if(!opts.some(o=>o.y===insightsSel.y&&o.m===insightsSel.m)) opts.push({...insightsSel});
+  opts.sort((a,b)=>(b.y-a.y)||(b.m-a.m));
+  sel.innerHTML=opts.map(o=>`<option value="${o.y}-${o.m}">${MONTHS[o.m]} ${o.y}</option>`).join('');
+  sel.value=insightsSel.y+'-'+insightsSel.m;
+}
 function renderInsights(){
+  const single=insightsMode==='month';
+  document.getElementById('irWrap').style.display=single?'none':'';
+  document.getElementById('imWrap').style.display=single?'flex':'none';
+  document.getElementById('insByMonth').style.display=single?'none':'';
+  ['Inc','Exp','Sav','Net'].forEach(k=>{
+    const lbl={Inc:'income',Exp:'expenses',Sav:'savings',Net:'net'}[k];
+    document.getElementById('iLbl'+k).textContent=single?lbl.charAt(0).toUpperCase()+lbl.slice(1):'Avg '+lbl;
+  });
+  if(single) buildInsightsMonthSelect();
   const today=new Date();
   const months=[];
-  for(let i=insightsRange-1;i>=0;i--){
-    const d=new Date(today.getFullYear(),today.getMonth()-i,1);
-    months.push({y:d.getFullYear(),m:d.getMonth()});
+  if(single){
+    months.push({y:insightsSel.y,m:insightsSel.m});
+  }else{
+    for(let i=insightsRange-1;i>=0;i--){
+      const d=new Date(today.getFullYear(),today.getMonth()-i,1);
+      months.push({y:d.getFullYear(),m:d.getMonth()});
+    }
   }
   const rows=months.map(({y,m})=>{
     const entries=load('entries_'+y+'_'+m)||[];
@@ -1020,7 +1077,7 @@ function renderInsights(){
   }).sort((a,b)=>b.val-a.val).slice(0,6);
   const topCatWrap=document.getElementById('insightsTopCatWrap');
   if(!topCats.length){
-    topCatWrap.innerHTML='<div class="empty-msg">No entries yet for this range</div>';
+    topCatWrap.innerHTML='<div class="empty-msg">'+(single?'No entries this month':'No entries yet for this range')+'</div>';
   }else{
     const topMax=topCats[0].val||1;
     topCatWrap.innerHTML=topCats.map(c=>`<div class="insight-cat-row">
@@ -1046,7 +1103,7 @@ function renderInsights(){
   });
   const essGrand=essTotal+nonTotal;
   if(essGrand<=0){
-    essWrap.innerHTML='<div class="empty-msg">No expenses yet for this range</div>';
+    essWrap.innerHTML='<div class="empty-msg">'+(single?'No expenses this month':'No expenses yet for this range')+'</div>';
   }else{
     const essPct=Math.round(essTotal/essGrand*100);
     const nonPct=100-essPct;
@@ -1064,7 +1121,7 @@ function renderInsights(){
       </div>
       <div class="insight-cmp-track"><div class="insight-cmp-fill" style="width:${nonPct}%;background:var(--amber,#f59e0b)"></div></div>
     </div>`;
-    monthlyEss.forEach(r=>{
+    if(!single) monthlyEss.forEach(r=>{
       const tot=r.e+r.ne;
       if(!tot) return;
       const ew=Math.round(r.e/tot*100);

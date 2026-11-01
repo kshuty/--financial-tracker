@@ -304,6 +304,14 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 .ess-pill{font-size:9.5px;font-weight:700;padding:4px 8px;border-radius:20px;border:1.5px solid;cursor:pointer;flex-shrink:0;white-space:nowrap;letter-spacing:.2px}
 .ess-pill.ess-on{color:var(--blue);border-color:var(--blue);background:var(--blue-l)}
 .ess-pill.ess-off{color:var(--text3);border-color:var(--border2);background:var(--surface2)}
+.fx-pill{font-size:9.5px;font-weight:700;padding:4px 8px;border-radius:20px;border:1.5px solid;cursor:pointer;flex-shrink:0;white-space:nowrap;letter-spacing:.02em;text-align:center}
+.fx-pill.fx-on{color:#7c3aed;border-color:#7c3aed;background:rgba(124,58,237,.10)}
+.fx-pill.fx-off{color:var(--text3);border-color:var(--border2);background:var(--surface2)}
+.pill-stack{display:flex;flex-direction:column;gap:4px;flex-shrink:0}
+.rec-edit-overlay.hide{display:none}
+.rec-mini-btn{height:34px;padding:0 12px;border-radius:var(--rs);border:1.5px solid var(--border2);background:var(--surface2);color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;flex-shrink:0}
+.rec-ended{opacity:.55}
+.rec-tag{display:inline-block;font-size:9px;font-weight:700;padding:1px 6px;border-radius:10px;background:var(--surface2);border:1px solid var(--border2);color:var(--text3);margin-left:6px;vertical-align:middle;text-transform:uppercase;letter-spacing:.04em}
 .setup-del{background:none;border:none;cursor:pointer;color:var(--text3);font-size:16px;padding:3px 2px;line-height:1;flex-shrink:0}
 .setup-del:active{color:var(--red)}
 .setup-add-area{background:var(--surface);border-radius:var(--r);box-shadow:var(--shadow);padding:14px;margin-bottom:10px}
@@ -446,6 +454,10 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
   <div class="sec-hdr"><div class="sec-icon r" style="font-size:15px">🎯</div><span class="sec-lbl">Essential vs non-essential</span></div>
   <p style="font-size:11px;color:var(--text3);margin:-4px 0 8px;padding:0 2px">Tap a group or category to show or hide the individual expenses.</p>
   <div class="card" id="insightsEssWrap"></div>
+
+  <div class="sec-hdr"><div class="sec-icon b" style="font-size:15px">📌</div><span class="sec-lbl">Fixed vs variable</span></div>
+  <p style="font-size:11px;color:var(--text3);margin:-4px 0 8px;padding:0 2px">Fixed costs stay about the same every month (rent, insurance). Variable costs change. Set this per category in Setup.</p>
+  <div class="card" id="insightsFixWrap"></div>
   </div>
 
   <div id="insDetail" style="display:none">
@@ -477,7 +489,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
     </div>
   </div>
   <div class="sec-hdr"><div class="sec-icon r">📤</div><span class="sec-lbl">Expense categories</span></div>
-  <p style="font-size:11px;color:var(--text3);margin:-4px 0 8px;padding:0 2px">Tap a category's pill to mark it Essential or Non-essential — used on the Insights tab.</p>
+  <p style="font-size:11px;color:var(--text3);margin:-4px 0 8px;padding:0 2px">Tap a category's pills to mark it Essential / Non-essential and Fixed / Variable — used on the Insights tab.</p>
   <div class="setup-cat-list" id="setupExpList"></div>
   <div class="setup-add-area">
     <div class="setup-add-title">Add expense category</div>
@@ -563,6 +575,17 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
         <span class="date-trigger-arrow">▾</span>
       </button>
     </div>
+    <div class="rec-row" id="recEndRow">
+      <div class="form-lbl">Ends <span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:11px;color:var(--text3)">(optional — earlier months are never changed)</span></div>
+      <div style="display:flex;gap:8px">
+        <button class="date-trigger" id="recEndTrigger" onclick="openDatePicker('recEnd')" style="flex:1">
+          <span class="date-trigger-icon">🏁</span>
+          <span class="date-trigger-text" id="recEndLabel">No end date</span>
+          <span class="date-trigger-arrow">▾</span>
+        </button>
+        <button class="rec-mini-btn" id="recEndClear" onclick="clearRecEnd()" style="display:none">Clear</button>
+      </div>
+    </div>
     <button class="rec-add-btn" onclick="addRecurring()">Add recurring transaction</button>
   </div>
 
@@ -576,6 +599,14 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
     </div>
     <p style="font-size:12px;color:var(--text3);line-height:1.5;margin-bottom:8px">Export every transaction (all months) as a spreadsheet-friendly CSV file.</p>
     <button onclick="exportCSV()" style="width:100%;height:44px;border-radius:var(--rs);border:1.5px solid var(--border2);background:var(--surface2);color:var(--text);font-size:14px;font-weight:600;cursor:pointer">📄 Export CSV</button>
+  </div>
+
+  <!-- Clear a month -->
+  <div class="sec-hdr" style="margin-top:6px"><div class="sec-icon" style="background:var(--surface2);font-size:16px">🗑️</div><span class="sec-lbl">Clear a month</span></div>
+  <div class="card" style="padding:16px;margin-bottom:14px">
+    <p style="font-size:13px;color:var(--text2);line-height:1.5;margin-bottom:12px">Delete every entry in one month. A backup of all your data downloads first, and recurring entries won't be re-added to that month unless you force-add them.</p>
+    <select id="clearMonthSel" style="width:100%;height:44px;border-radius:var(--rs);border:1.5px solid var(--border2);background:var(--surface2);color:var(--text);font-size:14px;font-weight:600;padding:0 12px;margin-bottom:8px"></select>
+    <button onclick="clearMonthData()" style="width:100%;height:44px;border-radius:var(--rs);border:none;background:var(--red);color:#fff;font-size:14px;font-weight:700;cursor:pointer">🗑️ Clear this month</button>
   </div>
 </div>
 
@@ -644,6 +675,23 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 </div>
 
 <!-- Date Picker Sheet -->
+<div class="rec-edit-overlay hide" id="recEditOverlay" onclick="if(event.target===this)closeRecEdit()">
+  <div class="rec-edit-sheet">
+    <div class="rec-edit-title"><span id="recEditTitle">Edit recurring</span><button class="rec-edit-close" onclick="closeRecEdit()">✕</button></div>
+    <p style="font-size:12px;color:var(--text3);line-height:1.5;margin-bottom:14px">Changes apply to entries added from now on. Entries already in your months stay exactly as they are.</p>
+    <div class="rec-row"><div class="form-lbl">Amount ($)</div><input class="inp-num" type="number" id="recEditAmt" inputmode="decimal" min="0" step="0.01"/></div>
+    <div class="rec-row"><div class="form-lbl">Description</div><input class="inp-text" type="text" id="recEditDesc" placeholder="optional"/></div>
+    <div class="rec-row"><div class="form-lbl">Starting from</div>
+      <button class="date-trigger" onclick="openDatePicker('reStart')"><span class="date-trigger-icon">📅</span><span class="date-trigger-text" id="recEditStartLabel"></span><span class="date-trigger-arrow">▾</span></button>
+    </div>
+    <div class="rec-row"><div class="form-lbl">Ends</div>
+      <button class="date-trigger" onclick="openDatePicker('reEnd')"><span class="date-trigger-icon">🏁</span><span class="date-trigger-text" id="recEditEndLabel"></span><span class="date-trigger-arrow">▾</span></button>
+      <div style="display:flex;gap:8px;margin-top:8px"><button class="rec-mini-btn" onclick="endRecToday()">End today</button><button class="rec-mini-btn" onclick="clearRecEditEnd()">Remove end date</button></div>
+    </div>
+    <div class="rec-edit-actions"><button class="rec-edit-save" onclick="saveRecEdit()">Save changes</button></div>
+  </div>
+</div>
+
 <div class="dp-overlay hide" id="dpOverlay" onclick="dpOverlayClick(event)">
   <div class="dp-sheet" id="dpSheet">
     <div class="dp-header">
@@ -749,6 +797,8 @@ let editDateY, editDateM, editDateD;
 const SK=k=>'mt_'+k;
 function load(k){try{const v=localStorage.getItem(SK(k));return v?JSON.parse(v):null;}catch(e){return null;}}
 function save(k,v){try{localStorage.setItem(SK(k),JSON.stringify(v));}catch(e){}}
+const FIXED_DEFAULTS=['Rent / mortgage','Internet & phone','Car payment','Car insurance','Health insurance','Streaming services','Gym / fitness','HOA fees','Property tax','Renters insurance'];
+function isFixedCat(c){if(!c) return false;if(c.fx!==undefined) return !!c.fx;return FIXED_DEFAULTS.includes(c.n);}
 function getSetup(){return load('setup')||{income:JSON.parse(JSON.stringify(DEFAULT_INC)),expense:JSON.parse(JSON.stringify(DEFAULT_EXP)),savings:JSON.parse(JSON.stringify(DEFAULT_SAV))};}
 function saveSetup(s){save('setup',s);}
 function getRecurring(){return load('recurring')||[];}
@@ -793,7 +843,16 @@ function fmtDateShort(y,m,d){
 function openDatePicker(target){
   dpTarget=target;
   if(target==='add'){dpY=addDateY;dpM=addDateM;dpD=addDateD;}
-  else if(target==='rec'){dpY=recStartY||addDateY;dpM=recStartM||addDateM;dpD=recStartD||addDateD;}
+  else if(target==='rec'){dpY=recStartY!=null?recStartY:addDateY;dpM=recStartM!=null?recStartM:addDateM;dpD=recStartD||addDateD;}
+  else if(target==='recEnd'){
+    if(recEndY!=null){dpY=recEndY;dpM=recEndM;dpD=recEndD;}
+    else{dpY=recStartY!=null?recStartY:addDateY;dpM=recStartM!=null?recStartM:addDateM;dpD=recStartD||addDateD;}
+  }
+  else if(target==='reStart'){dpY=reState.sy;dpM=reState.sm;dpD=reState.sd;}
+  else if(target==='reEnd'){
+    if(reState.ey!=null){dpY=reState.ey;dpM=reState.em;dpD=reState.ed;}
+    else{dpY=reState.sy;dpM=reState.sm;dpD=reState.sd;}
+  }
   else{dpY=editDateY;dpM=editDateM;dpD=editDateD;}
   calNavY=dpY; calNavM=dpM;
   dialState={y:dpY,m:dpM,d:dpD};
@@ -818,6 +877,9 @@ function confirmDate(){
   else{dpY=dialState.y;dpM=dialState.m;dpD=dialState.d;}
   if(dpTarget==='add'){addDateY=dpY;addDateM=dpM;addDateD=dpD;document.getElementById('addDateLabel').textContent=fmtDateShort(dpY,dpM,dpD);}
   else if(dpTarget==='rec'){recStartY=dpY;recStartM=dpM;recStartD=dpD;document.getElementById('recStartLabel').textContent=fmtDateShort(dpY,dpM,dpD);}
+  else if(dpTarget==='recEnd'){recEndY=dpY;recEndM=dpM;recEndD=dpD;refreshRecEndUI();}
+  else if(dpTarget==='reStart'){reState.sy=dpY;reState.sm=dpM;reState.sd=dpD;refreshRecEditUI();}
+  else if(dpTarget==='reEnd'){reState.ey=dpY;reState.em=dpM;reState.ed=dpD;refreshRecEditUI();}
   else{editDateY=dpY;editDateM=dpM;editDateD=dpD;document.getElementById('editDateLabel').textContent=fmtDateShort(dpY,dpM,dpD);}
   closeDatePicker();
 }
@@ -989,6 +1051,7 @@ let insightsMode='month';
 let insightsView='overview';      // month mode: overview | income | expense | savings
 let insightsSort='date';          // date | amt
 let insightsExpFilter='all';      // all | ess | non
+let insightsFixFilter='all';      // all | fix | var
 const insOpen={};                 // expanded/collapsed state of essential-section groups
 let insightsSel={y:new Date().getFullYear(),m:new Date().getMonth()};
 
@@ -1025,6 +1088,7 @@ function setInsightsView(v){
 }
 function setInsightsSort(s){insightsSort=s;renderInsights();}
 function setInsightsExpFilter(f){insightsExpFilter=f;renderInsights();}
+function setInsightsFixFilter(f){insightsFixFilter=f;renderInsights();}
 function shiftInsightsMonth(dir){
   const d=new Date(insightsSel.y,insightsSel.m+dir,1);
   insightsSel={y:d.getFullYear(),m:d.getMonth()};
@@ -1140,85 +1204,16 @@ function renderInsights(){
     </div>`;
   }).join('');
 
-  /* ── Essential vs non-essential (expenses only, over range) ── */
+  /* ── Essential vs non-essential, and Fixed vs variable (expenses only, over range) ── */
   const setup=getSetup();
-  const essWrap=document.getElementById('insightsEssWrap');
-  const groups={
-    ess:{key:'ess',lbl:'🔷 Essential',col:'var(--blue)',total:0,cats:{}},
-    non:{key:'non',lbl:'🔶 Non-essential',col:'var(--amber,#f59e0b)',total:0,cats:{}},
-  };
-  const monthlyEss=months.map(({y,m})=>{
-    let e=0,ne=0;
-    insEntries(y,m).filter(en=>en.type==='expense').forEach(en=>{
-      const catObj=setup.expense.find(c=>c.n===en.cat);
-      const isEss=!!(catObj&&catObj.e);
-      const g=isEss?groups.ess:groups.non;
-      g.total+=en.amt;
-      if(isEss) e+=en.amt; else ne+=en.amt;
-      const c=g.cats[en.cat]||(g.cats[en.cat]={name:en.cat,icon:catObj?catObj.i:'📌',total:0,items:[]});
-      c.total+=en.amt;
-      c.items.push({desc:en.desc,amt:en.amt,date:en.date,rec:!!en._rec});
-    });
-    return {y,m,e,ne};
-  });
-  const essTotal=groups.ess.total, nonTotal=groups.non.total;
-  const essGrand=essTotal+nonTotal;
-  if(essGrand<=0){
-    essWrap.innerHTML='<div class="empty-msg">'+(single?'No expenses this month':'No expenses yet for this range')+'</div>';
-  }else{
-    let essHtml='';
-    [groups.ess,groups.non].forEach(g=>{
-      const pct=Math.round(g.total/essGrand*100);
-      const gOpen=insIsOpen('g:'+g.key);
-      const catList=Object.values(g.cats).sort((a,b)=>b.total-a.total);
-      const nTx=catList.reduce((a,c)=>a+c.items.length,0);
-      essHtml+=`<div class="insight-cmp-row ins-click" data-k="g:${g.key}" onclick="toggleInsOpen(this.dataset.k)">
-        <div class="insight-cmp-top">
-          <span class="insight-cmp-lbl"><span class="ins-chev${gOpen?' open':''}">▶</span>${g.lbl}<span class="ins-n">${nTx} ${nTx===1?'expense':'expenses'}</span></span>
-          <span><span class="insight-cmp-amt" style="color:${g.col}">${fmt(g.total)}</span><span class="insight-cmp-pct">${pct}%</span></span>
-        </div>
-        <div class="insight-cmp-track"><div class="insight-cmp-fill" style="width:${pct}%;background:${g.col}"></div></div>
-      </div>`;
-      if(gOpen){
-        if(!catList.length){
-          essHtml+='<div class="ins-empty-row">Nothing here</div>';
-        }
-        catList.forEach(c=>{
-          const ck='c:'+g.key+':'+c.name;
-          const cOpen=insIsOpen(ck);
-          const items=[...c.items].sort((a,b)=>b.amt-a.amt);
-          essHtml+=`<div class="ins-cat-hd ins-click" data-k="${insEsc(ck)}" onclick="toggleInsOpen(this.dataset.k)">
-            <span class="ins-chev${cOpen?' open':''}">▶</span>
-            <span class="insight-cat-icon">${c.icon}</span>
-            <span class="insight-cat-name">${insEsc(c.name)}<span class="ins-n">×${c.items.length}</span></span>
-            <span class="ins-cat-tot">${fmt(c.total)}</span>
-          </div>`;
-          if(cOpen){
-            items.forEach(it=>{
-              const label=it.desc?insEsc(it.desc):'<span style="color:var(--text3)">No description</span>';
-              essHtml+=`<div class="ins-tx">
-                <div class="ins-tx-info"><div class="ins-tx-t">${label}${it.rec?' 🔁':''}</div><div class="ins-tx-s">${it.date?dayLbl(it.date)+(single?'':', '+parseDateStr(it.date).y):''}</div></div>
-                <span class="ins-tx-amt">${fmt(it.amt)}</span>
-              </div>`;
-            });
-          }
-        });
-      }
-    });
-    if(!single) monthlyEss.forEach(r=>{
-      const tot=r.e+r.ne;
-      if(!tot) return;
-      const ew=Math.round(r.e/tot*100);
-      essHtml+=`<div class="ess-mo-row">
-        <div class="ess-mo-top">
-          <span class="ess-mo-month">${MS[r.m]} ${r.y}</span>
-          <span class="ess-mo-split">${fmt(r.e)} · ${fmt(r.ne)}</span>
-        </div>
-        <div class="ess-mo-track"><div class="ess-mo-e" style="width:${ew}%"></div><div class="ess-mo-n" style="width:${100-ew}%"></div></div>
-      </div>`;
-    });
-    essWrap.innerHTML=essHtml;
-  }
+  document.getElementById('insightsEssWrap').innerHTML=insBreakdown(months,setup,single,{
+    a:{key:'ess',lbl:'🔷 Essential',col:'var(--blue)'},
+    b:{key:'non',lbl:'🔶 Non-essential',col:'var(--amber,#f59e0b)'},
+    test:c=>!!(c&&c.e)});
+  document.getElementById('insightsFixWrap').innerHTML=insBreakdown(months,setup,single,{
+    a:{key:'fix',lbl:'📌 Fixed',col:'#7c3aed'},
+    b:{key:'var',lbl:'🔀 Variable',col:'#0d9488'},
+    test:c=>isFixedCat(c)});
 
   /* ── By-month list ── */
   const wrap=document.getElementById('insightsListWrap');
@@ -1247,6 +1242,70 @@ function renderInsights(){
   wrap.innerHTML=html;
 }
 
+/* Builds one expandable two-group breakdown of expenses (used for Essential and for Fixed) */
+function insBreakdown(months,setup,single,cfg){
+  const A={...cfg.a,total:0,cats:{}}, B={...cfg.b,total:0,cats:{}};
+  const monthly=months.map(({y,m})=>{
+    let a=0,b=0;
+    insEntries(y,m).filter(en=>en.type==='expense').forEach(en=>{
+      const catObj=setup.expense.find(c=>c.n===en.cat);
+      const inA=cfg.test(catObj);
+      const g=inA?A:B;
+      g.total+=en.amt;
+      if(inA) a+=en.amt; else b+=en.amt;
+      const c=g.cats[en.cat]||(g.cats[en.cat]={name:en.cat,icon:catObj?catObj.i:'📌',total:0,items:[]});
+      c.total+=en.amt;
+      c.items.push({desc:en.desc,amt:en.amt,date:en.date,rec:!!en._rec});
+    });
+    return {y,m,a,b};
+  });
+  const grand=A.total+B.total;
+  if(grand<=0) return '<div class="empty-msg">'+(single?'No expenses this month':'No expenses yet for this range')+'</div>';
+  let h='';
+  [A,B].forEach(g=>{
+    const pct=Math.round(g.total/grand*100);
+    const gOpen=insIsOpen('g:'+g.key);
+    const catList=Object.values(g.cats).sort((x,y)=>y.total-x.total);
+    const nTx=catList.reduce((n,c)=>n+c.items.length,0);
+    h+=`<div class="insight-cmp-row ins-click" data-k="g:${g.key}" onclick="toggleInsOpen(this.dataset.k)">
+      <div class="insight-cmp-top">
+        <span class="insight-cmp-lbl"><span class="ins-chev${gOpen?' open':''}">▶</span>${g.lbl}<span class="ins-n">${nTx} ${nTx===1?'expense':'expenses'}</span></span>
+        <span><span class="insight-cmp-amt" style="color:${g.col}">${fmt(g.total)}</span><span class="insight-cmp-pct">${pct}%</span></span>
+      </div>
+      <div class="insight-cmp-track"><div class="insight-cmp-fill" style="width:${pct}%;background:${g.col}"></div></div>
+    </div>`;
+    if(!gOpen) return;
+    if(!catList.length) h+='<div class="ins-empty-row">Nothing here</div>';
+    catList.forEach(c=>{
+      const ck='c:'+g.key+':'+c.name;
+      const cOpen=insIsOpen(ck);
+      h+=`<div class="ins-cat-hd ins-click" data-k="${insEsc(ck)}" onclick="toggleInsOpen(this.dataset.k)">
+        <span class="ins-chev${cOpen?' open':''}">▶</span>
+        <span class="insight-cat-icon">${c.icon}</span>
+        <span class="insight-cat-name">${insEsc(c.name)}<span class="ins-n">×${c.items.length}</span></span>
+        <span class="ins-cat-tot">${fmt(c.total)}</span>
+      </div>`;
+      if(!cOpen) return;
+      [...c.items].sort((x,y)=>y.amt-x.amt).forEach(it=>{
+        const label=it.desc?insEsc(it.desc):'<span style="color:var(--text3)">No description</span>';
+        h+=`<div class="ins-tx">
+          <div class="ins-tx-info"><div class="ins-tx-t">${label}${it.rec?' 🔁':''}</div><div class="ins-tx-s">${it.date?dayLbl(it.date)+(single?'':', '+parseDateStr(it.date).y):''}</div></div>
+          <span class="ins-tx-amt">${fmt(it.amt)}</span>
+        </div>`;
+      });
+    });
+  });
+  if(!single) monthly.forEach(r=>{
+    const tot=r.a+r.b; if(!tot) return;
+    const aw=Math.round(r.a/tot*100);
+    h+=`<div class="ess-mo-row">
+      <div class="ess-mo-top"><span class="ess-mo-month">${MS[r.m]} ${r.y}</span><span class="ess-mo-split">${fmt(r.a)} · ${fmt(r.b)}</span></div>
+      <div class="ess-mo-track"><div class="ess-mo-e" style="width:${aw}%;background:${A.col}"></div><div class="ess-mo-n" style="width:${100-aw}%;background:${B.col}"></div></div>
+    </div>`;
+  });
+  return h;
+}
+
 /* ── Month detail: Income / Expenses / Savings ── */
 function renderInsightsDetail(){
   const wrap=document.getElementById('insightsDetailWrap');
@@ -1260,8 +1319,8 @@ function renderInsightsDetail(){
   const isExp=type==='expense';
   const getList=(yy,mm)=>insEntries(yy,mm).filter(e=>e.type===type).map(e=>{
     const co=cats.find(c=>c.n===e.cat);
-    return {...e,icon:co?co.i:'📌',ess:isExp&&!!(co&&co.e)};
-  }).filter(e=>!isExp||insightsExpFilter==='all'||(insightsExpFilter==='ess'?e.ess:!e.ess));
+    return {...e,icon:co?co.i:'📌',ess:isExp&&!!(co&&co.e),fixed:isExp&&isFixedCat(co)};
+  }).filter(e=>!isExp||((insightsExpFilter==='all'||(insightsExpFilter==='ess'?e.ess:!e.ess))&&(insightsFixFilter==='all'||(insightsFixFilter==='fix'?e.fixed:!e.fixed))));
 
   const list=getList(y,m);
   const pd=new Date(y,m-1,1);
@@ -1277,6 +1336,11 @@ function renderInsightsDetail(){
       <button class="vt-btn${f==='all'?' on':''}" onclick="setInsightsExpFilter('all')">All</button>
       <button class="vt-btn${f==='ess'?' on':''}" onclick="setInsightsExpFilter('ess')">🔷 Essential</button>
       <button class="vt-btn${f==='non'?' on':''}" onclick="setInsightsExpFilter('non')">🔶 Non-essential</button>
+    </div>
+    <div class="view-toggle">
+      <button class="vt-btn${insightsFixFilter==='all'?' on':''}" onclick="setInsightsFixFilter('all')">All</button>
+      <button class="vt-btn${insightsFixFilter==='fix'?' on':''}" onclick="setInsightsFixFilter('fix')">📌 Fixed</button>
+      <button class="vt-btn${insightsFixFilter==='var'?' on':''}" onclick="setInsightsFixFilter('var')">🔀 Variable</button>
     </div>`;
   }
   html+=`<div class="ins-sum">
@@ -1318,7 +1382,7 @@ function renderInsightsDetail(){
   </div><div class="card">`;
   html+=sorted.map(e=>{
     const t=e.desc?insEsc(e.desc):insEsc(e.cat);
-    const tag=isExp?(e.ess?' · 🔷':' · 🔶'):'';
+    const tag=isExp?(e.ess?' · 🔷 Essential':' · 🔶 Non-essential')+(e.fixed?' · 📌 Fixed':' · 🔀 Variable'):'';
     return `<div class="ins-tx ins-tx-full">
       <span class="ei-icon">${e.icon}</span>
       <div class="ins-tx-info"><div class="ins-tx-t">${t}${e._rec?' 🔁':''}</div><div class="ins-tx-s">${e.desc?insEsc(e.cat)+' · ':''}${e.date?dayLbl(e.date):''}${tag}</div></div>
@@ -1535,6 +1599,7 @@ function renderSetup(){
   renderSuggestions('expense',s.expense);
   renderSuggestions('savings',s.savings);
   renderRecurringList();
+  populateClearMonthSelect();
 }
 function renderSetupList(type,cats){
   const idMap={income:'setupIncList',expense:'setupExpList',savings:'setupSavList'};
@@ -1550,7 +1615,7 @@ function renderSetupList(type,cats){
         ontouchend="touchDragEnd(event)">☰</span>
       <button class="setup-emoji-btn" onclick="openEmojiPicker('${type}',${i})">${c.i}</button>
       <span class="setup-name">${c.n}</span>
-      ${type==='expense'?`<button class="ess-pill ${c.e?'ess-on':'ess-off'}" onclick="toggleEssential(${i})">${c.e?'Essential':'Non-essential'}</button>`:''}
+      ${type==='expense'?`<span class="pill-stack"><button class="ess-pill ${c.e?'ess-on':'ess-off'}" onclick="toggleEssential(${i})">${c.e?'Essential':'Non-essential'}</button><button class="fx-pill ${isFixedCat(c)?'fx-on':'fx-off'}" onclick="toggleFixed(${i})">${isFixedCat(c)?'Fixed':'Variable'}</button></span>`:''}
       <button class="setup-del" onclick="removeCat('${type}',${i})">✕</button>
     </div>`).join('');
 }
@@ -1569,7 +1634,7 @@ function addSugCat(type,name){
   if(!s.savings) s.savings=JSON.parse(JSON.stringify(DEFAULT_SAV));
   if(s[type].find(c=>c.n===name)) return;
   const cat={n:name,i:autoIcon(name)};
-  if(type==='expense') cat.e=false;
+  if(type==='expense'){cat.e=false;cat.fx=FIXED_DEFAULTS.includes(name);}
   s[type].push(cat);
   saveSetup(s);renderSetup();populateAddSelect();showToast(name+' added');
 }
@@ -1582,7 +1647,7 @@ function addCustomCat(type){
   if(!s.savings) s.savings=JSON.parse(JSON.stringify(DEFAULT_SAV));
   if(s[type].find(c=>c.n.toLowerCase()===name.toLowerCase())){showToast('Already exists');return;}
   const cat={n:name,i:autoIcon(name)};
-  if(type==='expense') cat.e=false;
+  if(type==='expense'){cat.e=false;cat.fx=FIXED_DEFAULTS.includes(name);}
   s[type].push(cat);
   saveSetup(s);inp.value='';renderSetup();populateAddSelect();showToast(name+' added ✓');
 }
@@ -1590,6 +1655,12 @@ function removeCat(type,idx){
   const s=getSetup();
   if(!s.savings) s.savings=JSON.parse(JSON.stringify(DEFAULT_SAV));
   s[type].splice(idx,1);saveSetup(s);renderSetup();populateAddSelect();
+}
+function toggleFixed(idx){
+  const s=getSetup();
+  if(!s.expense[idx]) return;
+  s.expense[idx].fx=!isFixedCat(s.expense[idx]);
+  saveSetup(s);renderSetup();
 }
 function toggleEssential(idx){
   const s=getSetup();
@@ -1602,6 +1673,16 @@ function toggleEssential(idx){
 let recType='expense';
 let recFreq='monthly';
 let recStartY, recStartM, recStartD;
+let recEndY=null, recEndM=0, recEndD=1;           // optional end date for the add form
+let reState={id:null,sy:0,sm:0,sd:1,ey:null,em:0,ed:1}; // state of the edit sheet
+const recStartStr=r=>r.startY!=null?dateStr(r.startY,r.startM||0,r.startD||1):null;
+const recEndStr=r=>r.endY!=null?dateStr(r.endY,r.endM||0,r.endD||1):null;
+function refreshRecEndUI(){
+  const has=recEndY!=null;
+  document.getElementById('recEndLabel').textContent=has?fmtDate(dateStr(recEndY,recEndM,recEndD)):'No end date';
+  document.getElementById('recEndClear').style.display=has?'':'none';
+}
+function clearRecEnd(){recEndY=null;refreshRecEndUI();}
 
 function setRecFreq(freq){
   recFreq=freq;
@@ -1638,14 +1719,51 @@ function addRecurring(){
     rec.dow=parseInt(document.getElementById('recDow').value);
   }
   rec.startY=recStartY; rec.startM=recStartM; rec.startD=recStartD;
+  if(recEndY!=null){
+    if(dateStr(recEndY,recEndM,recEndD)<dateStr(recStartY,recStartM,recStartD)){showToast('End date is before the start date','⚠️');return;}
+    rec.endY=recEndY; rec.endM=recEndM; rec.endD=recEndD;
+  }
   const recs=getRecurring();
   recs.push(rec);
   saveRecurring(recs);
   document.getElementById('recDesc').value='';
   document.getElementById('recAmt').value='';
   document.getElementById('recDay').value='';
+  clearRecEnd();
   renderRecurringList();
   showToast('Recurring added ✓','🔁');
+}
+function openRecEdit(id){
+  const r=getRecurring().find(x=>x.id===id); if(!r) return;
+  const t=new Date();
+  reState={id,
+    sy:r.startY!=null?r.startY:t.getFullYear(), sm:r.startM!=null?r.startM:t.getMonth(), sd:r.startD||1,
+    ey:r.endY!=null?r.endY:null, em:r.endM||0, ed:r.endD||1};
+  document.getElementById('recEditTitle').textContent='Edit · '+r.cat;
+  document.getElementById('recEditAmt').value=r.amt;
+  document.getElementById('recEditDesc').value=r.desc||'';
+  refreshRecEditUI();
+  document.getElementById('recEditOverlay').classList.remove('hide');
+}
+function closeRecEdit(){document.getElementById('recEditOverlay').classList.add('hide');}
+function refreshRecEditUI(){
+  document.getElementById('recEditStartLabel').textContent=fmtDate(dateStr(reState.sy,reState.sm,reState.sd));
+  document.getElementById('recEditEndLabel').textContent=reState.ey!=null?fmtDate(dateStr(reState.ey,reState.em,reState.ed)):'No end date';
+}
+function endRecToday(){const t=new Date();reState.ey=t.getFullYear();reState.em=t.getMonth();reState.ed=t.getDate();refreshRecEditUI();}
+function clearRecEditEnd(){reState.ey=null;refreshRecEditUI();}
+function saveRecEdit(){
+  const amt=parseFloat(document.getElementById('recEditAmt').value);
+  if(!amt||amt<=0){showToast('Enter an amount');return;}
+  if(reState.ey!=null&&dateStr(reState.ey,reState.em,reState.ed)<dateStr(reState.sy,reState.sm,reState.sd)){showToast('End date is before the start date','⚠️');return;}
+  const recs=getRecurring();
+  const r=recs.find(x=>x.id===reState.id); if(!r) return;
+  r.amt=amt; r.desc=document.getElementById('recEditDesc').value.trim();
+  r.startY=reState.sy; r.startM=reState.sm; r.startD=reState.sd;
+  if(reState.ey!=null){r.endY=reState.ey;r.endM=reState.em;r.endD=reState.ed;}
+  else{delete r.endY;delete r.endM;delete r.endD;}
+  saveRecurring(recs);
+  closeRecEdit();renderRecurringList();showToast('Recurring updated ✓','🔁');
 }
 function removeRecurring(id){
   const recs=getRecurring().filter(r=>r.id!==id);
@@ -1679,7 +1797,11 @@ function renderRecurringList(){
     const freq=r.freq||'monthly';
     const freqIcon=freq==='monthly'?'📅':freq==='weekly'?'🗓':'📆';
     const freqTxt=recFreqLabel(r);
-    return `<div class="rec-item">
+    const sS=recStartStr(r), eS=recEndStr(r);
+    const todayS=dateStr(now.getFullYear(),now.getMonth(),now.getDate());
+    const ended=!!(eS&&eS<todayS);
+    const dateTxt=(sS?'From '+fmtDate(sS):'')+(eS?(sS?' · ':'')+'Ends '+fmtDate(eS):(sS?' · No end date':''));
+    return `<div class="rec-item${ended?' rec-ended':''}">
       <div class="rec-day-badge" style="${freq!=='monthly'?'flex-direction:column;gap:1px':''}">
         ${freq==='monthly'
           ? `<div style="font-size:9px;color:var(--text3);line-height:1">day</div><div style="font-size:14px;font-weight:800;line-height:1.2">${r.day}</div>`
@@ -1687,10 +1809,12 @@ function renderRecurringList(){
         }
       </div>
       <div class="rec-info">
-        <div class="rec-name">${catObj.i} ${r.cat}</div>
+        <div class="rec-name">${catObj.i} ${r.cat}${ended?'<span class="rec-tag">Ended</span>':''}</div>
         <div class="rec-sub">${freqTxt}${sub?' · '+sub:''}</div>
+        ${dateTxt?`<div class="rec-sub">${dateTxt}</div>`:''}
       </div>
       <span class="rec-amt" style="color:${col}">${fmt(r.amt)}</span>
+      <button class="rec-del" onclick="openRecEdit(${r.id})" title="Edit dates & amount">✏️</button>
       <button class="rec-del" onclick="removeRecurring(${r.id})" title="Delete">🗑️</button>
     </div>`;
   }).join('');
@@ -1724,22 +1848,26 @@ function getRecurringDatesForMonth(r, y, m){
 }
 
 function injectRecurring(force){
+  if(force) localStorage.removeItem(SK('norec_'+monthKey()));
+  else if(load('norec_'+monthKey())) return;
   const recs=getRecurring();
   if(!recs.length){if(force)showToast('No recurring set up','🔁');return;}
   const entries=getEntries();
   const todayStr=dateStr(now.getFullYear(),now.getMonth(),now.getDate());
   let added=0;
   recs.forEach(r=>{
-    // Skip months before the rule's start date
-    const startY=r.startY||curYear;
-    const startM=r.startM!==undefined?r.startM:curMonth;
-    if(curYear<startY||(curYear===startY&&curMonth<startM)) return;
+    // Rule only fires on dates between its start date and (optional) end date
+    const startStr=recStartStr(r), endStr=recEndStr(r);
+    if(startStr&&startStr.slice(0,7)>dateStr(curYear,curMonth,1).slice(0,7)) return;
+    if(endStr&&endStr<dateStr(curYear,curMonth,1)) return;
 
     // Get all dates this rule fires this month
     const allDates=getRecurringDatesForMonth(r,curYear,curMonth);
     allDates.forEach(ds=>{
       // Today-only: only inject if the date is today or in the past (already passed this month)
       // When force=true (manual button), inject all dates for the month regardless
+      if(startStr&&ds<startStr) return;
+      if(endStr&&ds>endStr) return;
       const shouldInject=force || ds<=todayStr;
       if(!shouldInject) return;
       // Check if already injected for this rule+date
@@ -1753,6 +1881,41 @@ function injectRecurring(force){
     saveEntries(entries);
   }
   if(force){renderSummary();showToast(`${added} entr${added===1?'y':'ies'} applied ✓`,'🔁');}
+}
+
+/* ══ Clear a month ══ */
+function populateClearMonthSelect(){
+  const sel=document.getElementById('clearMonthSel');
+  if(!sel) return;
+  const found={};
+  Object.keys(localStorage).forEach(k=>{
+    const mt=k.match(/^mt_entries_(\d+)_(\d+)$/);
+    if(!mt) return;
+    let arr=[];try{arr=JSON.parse(localStorage.getItem(k))||[];}catch(e){}
+    if(arr.length) found[mt[1]+'_'+mt[2]]={y:+mt[1],m:+mt[2],n:arr.length};
+  });
+  const ck=curYear+'_'+curMonth;
+  if(!found[ck]) found[ck]={y:curYear,m:curMonth,n:0};
+  const list=Object.values(found).sort((a,b)=>(b.y-a.y)||(b.m-a.m));
+  const prev=sel.value;
+  sel.innerHTML=list.map(o=>`<option value="${o.y}_${o.m}">${MONTHS[o.m]} ${o.y} · ${o.n} ${o.n===1?'entry':'entries'}</option>`).join('');
+  if(prev&&list.some(o=>o.y+'_'+o.m===prev)) sel.value=prev;
+}
+function clearMonthData(){
+  const sel=document.getElementById('clearMonthSel');
+  if(!sel||!sel.value) return;
+  const [y,m]=sel.value.split('_').map(Number);
+  const entries=load('entries_'+y+'_'+m)||[];
+  if(!entries.length){showToast('Nothing to clear in '+MONTHS[m],'ℹ️');return;}
+  const ok=confirm(`Clear all ${entries.length} ${entries.length===1?'entry':'entries'} for ${MONTHS[m]} ${y}?\n\nA backup of all your data will download first. This can't be undone.`);
+  if(!ok) return;
+  exportData();                                  // safety backup first
+  localStorage.removeItem(SK('entries_'+y+'_'+m));
+  save('norec_'+y+'_'+m,true);                   // don't auto re-add recurring entries to this month
+  populateClearMonthSelect();
+  renderSummary();
+  if(typeof renderInsights==='function') renderInsights();
+  showToast(MONTHS[m]+' '+y+' cleared ✓','🗑️');
 }
 
 /* ══ Import / Export ══ */
@@ -1946,7 +2109,7 @@ document.getElementById('mname').textContent=MONTHS[curMonth]+' '+curYear;
 setType('expense');
 setRecType('expense');
 setRecFreq('monthly');
+refreshRecEndUI();
 </script>
-
 </body>
 </html>

@@ -1948,25 +1948,5 @@ setRecType('expense');
 setRecFreq('monthly');
 </script>
 
-<script>
-/* DEMO DATA – preview only */
-(function(){try{
- const t=new Date();const ym=o=>{const d=new Date(t.getFullYear(),t.getMonth()-o,1);return[d.getFullYear(),d.getMonth()];};
- const ds=(y,m,d)=>y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
- const set=getSetup(),ex=set.expense,inc=set.income[0].n,sv=(set.savings&&set.savings[0])?set.savings[0].n:'Savings';
- const rnd=(a,b)=>Math.round(a+Math.random()*(b-a));
- for(let o=0;o<6;o++){const[y,m]=ym(o);
-  save('entries_'+y+'_'+m,[
-   {type:'income',cat:inc,desc:'Paycheck',amt:3200,date:ds(y,m,1),ts:1},
-   {type:'expense',cat:ex[0].n,desc:'Monthly rent',amt:1200,date:ds(y,m,1),ts:2,_rec:true},
-   {type:'expense',cat:ex[1].n,desc:'Weekly shop',amt:rnd(90,140),date:ds(y,m,4),ts:3},
-   {type:'expense',cat:ex[1].n,desc:'Farmers market',amt:rnd(25,50),date:ds(y,m,12),ts:4},
-   {type:'expense',cat:ex[2].n,desc:'Dinner out',amt:rnd(40,90),date:ds(y,m,8),ts:5},
-   {type:'expense',cat:ex[2].n,desc:'Coffee & brunch',amt:rnd(20,45),date:ds(y,m,15),ts:6},
-   {type:'expense',cat:ex[3].n,desc:'Fill-up',amt:rnd(45,70),date:ds(y,m,10),ts:7},
-   {type:'savings',cat:sv,desc:'Monthly transfer',amt:300,date:ds(y,m,2),ts:8}]);}
- switchTab('insights');
-}catch(e){console.error(e)}})();
-</script>
 </body>
 </html>

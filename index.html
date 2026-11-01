@@ -607,6 +607,9 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
     <p style="font-size:13px;color:var(--text2);line-height:1.5;margin-bottom:12px">Delete every entry in one month. A backup of all your data downloads first, and recurring entries won't be re-added to that month unless you force-add them.</p>
     <select id="clearMonthSel" style="width:100%;height:44px;border-radius:var(--rs);border:1.5px solid var(--border2);background:var(--surface2);color:var(--text);font-size:14px;font-weight:600;padding:0 12px;margin-bottom:8px"></select>
     <button onclick="clearMonthData()" style="width:100%;height:44px;border-radius:var(--rs);border:none;background:var(--red);color:#fff;font-size:14px;font-weight:700;cursor:pointer">🗑️ Clear this month</button>
+    <div style="border-top:1px solid var(--border);margin:16px 0 12px"></div>
+    <p style="font-size:13px;color:var(--text2);line-height:1.5;margin-bottom:10px">Or delete the entries in <b>every</b> month at once. Your categories and recurring rules are kept. You'll be asked to confirm twice, and a backup downloads first.</p>
+    <button onclick="clearAllEntries()" style="width:100%;height:44px;border-radius:var(--rs);border:1.5px solid var(--red);background:var(--red-l);color:var(--red);font-size:14px;font-weight:700;cursor:pointer">⚠️ Clear all entries</button>
   </div>
 </div>
 
@@ -1849,7 +1852,10 @@ function getRecurringDatesForMonth(r, y, m){
 
 function injectRecurring(force){
   if(force) localStorage.removeItem(SK('norec_'+monthKey()));
-  else if(load('norec_'+monthKey())) return;
+  else{
+    const upto=load('norec_upto');
+    if(load('norec_'+monthKey())||(upto!=null&&curYear*12+curMonth<upto)) return;
+  }
   const recs=getRecurring();
   if(!recs.length){if(force)showToast('No recurring set up','🔁');return;}
   const entries=getEntries();
@@ -1916,6 +1922,24 @@ function clearMonthData(){
   renderSummary();
   if(typeof renderInsights==='function') renderInsights();
   showToast(MONTHS[m]+' '+y+' cleared ✓','🗑️');
+}
+
+function clearAllEntries(){
+  const keys=Object.keys(localStorage).filter(k=>/^mt_entries_\d+_\d+$/.test(k));
+  let total=0,months=0;
+  keys.forEach(k=>{try{const n=(JSON.parse(localStorage.getItem(k))||[]).length;if(n){total+=n;months++;}}catch(e){}});
+  if(!total){showToast('No entries to clear','ℹ️');return;}
+  if(!confirm(`Delete ALL ${total} ${total===1?'entry':'entries'} across ${months} ${months===1?'month':'months'}?\n\nCategories and recurring rules are kept. A backup will download first. This can't be undone.`)) return;
+  const word=prompt('To confirm, type DELETE');
+  if(word===null||word.trim().toUpperCase()!=='DELETE'){showToast('Cancelled — nothing was deleted');return;}
+  exportData();                                       // safety backup first
+  keys.forEach(k=>localStorage.removeItem(k));
+  Object.keys(localStorage).filter(k=>k.indexOf('mt_norec_')===0).forEach(k=>localStorage.removeItem(k));
+  save('norec_upto',now.getFullYear()*12+now.getMonth()+1); // recurring won't re-fill cleared months
+  populateClearMonthSelect();
+  renderSummary();
+  if(typeof renderInsights==='function') renderInsights();
+  showToast('All entries cleared ✓','🗑️');
 }
 
 /* ══ Import / Export ══ */
